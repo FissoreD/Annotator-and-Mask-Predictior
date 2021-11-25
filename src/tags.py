@@ -10,6 +10,8 @@ class Tag(set):
         return super().add(__object)
 
     def remove(self, __value):
+        if __value not in self:
+            return
         super().remove(__value)
         return self.image_remove_tag(__value)
 

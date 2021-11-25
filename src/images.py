@@ -9,7 +9,8 @@ from os import listdir
 from PIL import Image, UnidentifiedImageError
 import shapely
 import json
-
+from PIL import ImageTk, Image
+import tkinter as tk
 path_to_image: str = "../img"
 
 
@@ -28,7 +29,9 @@ def open_files():
 class Img:
     def __init__(self, img_path: str) -> None:
         self.path = img_path
-        self.img = Image.open(img_path)
+        XSIZE = 100
+        YSIZE = XSIZE
+        self.img = Image.open(img_path).resize((XSIZE, YSIZE), Image.ANTIALIAS)
         self.tag: dict = dict()
         self.tag_list: set = set()
         self.is_selected = False
@@ -44,7 +47,8 @@ class Img:
             self.tag[tag] = ((x1, y1), (x2, y2))
 
     def remove_tag(self, tag):
-        self.tag.pop(tag)
+        if tag in self.tag:
+            self.tag.pop(tag)
 
     def update_tag(self, old_value, new_value):
         if old_value in self.tag:
@@ -56,6 +60,35 @@ class Img:
 
     def __repr__(self):
         return self.__str__()
+
+    def createMiniLabel(self, frm):
+        photo = ImageTk.PhotoImage(self.img)
+        imgLabel = tk.Label(frm.scrollable_frame,
+                            image=photo, anchor=tk.CENTER)
+        imgLabel.image = photo
+        self.imgLabel: tk.Label = imgLabel
+        self.imgLabelConfigs = [imgLabel.config()]
+        imgLabel.bind("<Enter>", self.mouseEnter)
+        imgLabel.bind("<Leave>", self.mouseLeave)
+        imgLabel.bind("<Button>", self.mouseClick)
+        return imgLabel
+
+    def mouseClick(self, event):
+        if self.is_selected:
+            self.imgLabel.config(relief="flat",
+                                 bg="SystemButtonFace", fg="SystemButtonFace")
+            self.is_selected = not self.is_selected
+        else:
+            self.imgLabel.config(relief="sunken",
+                                 bg="gray51", fg="white")
+            self.is_selected = not self.is_selected
+        print(self.path, "Mouse click")
+
+    def mouseEnter(self, event):
+        print(self.path, "Mouse entered")
+
+    def mouseLeave(self, event):
+        print(self.path, "Mouse left")
 
 
 if __name__ == '__main__':

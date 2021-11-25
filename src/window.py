@@ -19,15 +19,6 @@ def get_selected_images(list_images: List[img.Img]):
     return [i for i in list_images if i.is_selected]
 
 
-def createLabel(im, frm):
-
-    photo = ImageTk.PhotoImage(im.img)
-    imgLabel = ttk.Label(frm.scrollable_frame, image=photo)
-    imgLabel.image = photo
-    imgLabel.pack()
-    return imgLabel
-
-
 class ImageMakeRect():
     def __init__(self, root, image: img.Img) -> None:
         self.canvas = tk.Canvas(root, width=300, height=300)
@@ -47,33 +38,27 @@ class ImageScrollBar:
         self.canvas.pack()
 
 
-def main(list_tag, list_img):
-    """
-    print(123)
-    root_window = tk.Tk()
-    notebook = ttk.Notebook(root_window)
-    # notebook.add(ImageMakeRect(
-    #     notebook, list_img[0]).canvas, text="All images")
-    #notebook.add(grep(notebook), text="Selected images")
-    # scrollbar = ImageScrollBar(list_img, root_window)
-    im = ImageTk.PhotoImage(list_img[0].img)
-    frame = tk.Frame(root_window)
-    label = tk.Label(frame, image=im)
-    label.image = im
-    root_window.mainloop()
-    """
+def main(list_tag, list_img: List[img.Img]):
 
     root = tk.Tk()
+    # style = ttk.Style(root)
+    # style.theme_use('winnative')
+    # for i in style.theme_names():
+    #     print(i)
     root.title('ImageAnnotator')
-    root.geometry('400x300')
 
     frm = ScrollableFrame(root)
 
-    frm.grid(row=100, column=100)
+    pos = 0
+    mod = 4
+    for i in list_img:
+        img = i.createMiniLabel(frm)
+        img.grid(row=pos // mod, column=pos %
+                 mod, ipadx=4, ipady=4)
+        pos += 1
 
-    for i in range(len(list_img)):
-        createLabel(list_img[i], frm)
-
+    frm.pack()
+    root.resizable(False, False)
     root.mainloop()
 
 
