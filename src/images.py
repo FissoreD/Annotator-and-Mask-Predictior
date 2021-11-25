@@ -31,6 +31,7 @@ class Img:
         self.img = Image.open(img_path)
         self.tag: dict = dict()
         self.tag_list: set = set()
+        self.is_selected = False
 
     def set_tag_list(self, l):
         self.tag_list = l

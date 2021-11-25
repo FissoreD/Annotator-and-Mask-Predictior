@@ -4,13 +4,17 @@
 from typing import List
 from tags import Tag
 import images as img
+import window
 
 tag_list = Tag(img.open_files())
 img_list = tag_list.imgs
+
+
 for i in img_list:
     i.set_tag_list(tag_list)
 
 if __name__ == '__main__':
+    window.main(tag_list, img_list)
     print(tag_list)
     print(img_list)
     tag_list.add('tipoff')
