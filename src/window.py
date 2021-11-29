@@ -28,14 +28,149 @@ class ImageMakeRect():
         self.canvas.create_image(20, 20, anchor=tk.NW, image=img)
 
 
-class ImageScrollBar:
-    import tkinter as tk
+class right_panel:
+    def __init__(self, root, father, list_image) -> None:
+        self.root = root
+        self.father = father
+        self.main_panel = tk.PanedWindow(father)
+        self.list_img = list_image
 
-    def __init__(self, list_img, window):
-        self.frm = tk.Frame(window)
-        self.canvas = tk.Label(
-            self.frm, image=ImageTk.PhotoImage(list_img[0].img))
-        self.canvas.pack()
+    def initialise(self):
+        self.tc = self.theme_class(self)
+        self.sb = self.select_option(self)
+
+    class select_option:
+        def __init__(self, rp) -> None:
+            self.rp = rp
+            self.main = tk.PanedWindow(rp.father)
+            self.main.pack()
+            self.create_buttons()
+
+        def create_buttons(self):
+            self.lab = tk.Label(self.main, text='Check/Unceck box')
+            self.button_pane = tk.PanedWindow(self.main)
+            self.b1 = tk.Button(self.button_pane, text='CheckAll')
+            self.b2 = tk.Button(self.button_pane, text='UncheckAll')
+            self.b1.bind("<Button-1>", lambda e: self.listener(True))
+            self.b2.bind("<Button-1>", lambda e: self.listener(False))
+            self.b1.pack(side="left")
+            self.b2.pack(side="right")
+            self.lab.pack()
+            self.button_pane.pack()
+
+        def listener(self, select_all):
+            for i in self.rp.list_img:
+                i.select(select_all)
+
+    class theme_class:
+        def __init__(self, rp) -> None:
+            self.rp = rp
+            self.create_theme_option_panel()
+
+        def create_theme_option_panel(self):
+            self.variable = tk.StringVar(self.rp.father)
+            self.style = ttk.Style(self.rp.root)
+            themes = self.style.theme_names()
+            self.variable.set(themes[0])
+            self.variable.trace("w", self.callback)
+            opt = tk.OptionMenu(self.rp.father, self.variable, *themes)
+            opt.pack(side='top')
+
+        def callback(self, *args):
+            self.style.theme_use(self.variable.get())
+
+
+class left_panel:
+    def __init__(self, father, images) -> None:
+        self.father = father
+        self.images = images
+        self.notebook = ttk.Notebook(father)
+        self.notebook.pack()
+        self.titles = ["All images", "Selected images", "Tags", "Help"]
+        self.tabs = [tk.Frame(self.notebook) for i in range(len(self.titles))]
+
+        self.under_frame1 = sf.create_scrollable_frame(self.tabs[0])
+        self.under_frame2 = sf.create_scrollable_frame(self.tabs[1])
+
+    def initialise(self):
+        for f in self.tabs:
+            f.pack()
+
+        self.notebook.bind("<<NotebookTabChanged>>", self.updateSelected)
+
+        pos = 0
+        pos2 = 0
+        mod = 4
+        for i in self.images:
+            if i.is_selected:
+                img = i.createMiniLabel(self.under_frame2)
+                img.grid(row=pos // mod, column=pos %
+                         mod, ipadx=4, ipady=4)
+                pos2 += 1
+            img = i.createMiniLabel(self.under_frame1)
+            img.grid(row=pos // mod, column=pos %
+                     mod, ipadx=4, ipady=4)
+            pos += 1
+
+        for f, i in zip(self.tabs, self.titles):
+            self.notebook.add(f, text=i)
+
+    def updateSelected(self, event):
+
+        pos = 0
+        mod = 4
+        if self.notebook.index(self.notebook.select()) == 1:
+            for widget in self.under_frame2.winfo_children():
+                widget.destroy()
+            for i in self.images:
+                if i.is_selected:
+                    img = i.createMiniLabel2(self.under_frame2)
+                    img.grid(row=pos // mod, column=pos %
+                             mod, ipadx=4, ipady=4)
+                    pos += 1
+
+
+class main_class:
+    def __init__(self, list_tag, list_img: List[img.Img], root) -> None:
+        self.list_tag = list_tag
+        self.list_img = list_img
+        self.root = root
+        root.title('ImageAnnotator')
+        self.initiate()
+
+    def initiate(self):
+        self.frame = tk.PanedWindow(self.root)
+        self.left_panel = tk.PanedWindow(self.frame)
+        self.right_panel = tk.PanedWindow(self.frame)
+        self.left_panel.pack(side="left")
+        self.right_panel.pack(side="right")
+        self.frame.pack()
+        self.create_left_panel()
+        self.create_right_panel()
+
+    def create_left_panel(self):
+        self.lp = left_panel(self.left_panel, self.list_img)
+        self.lp.initialise()
+
+        # root = self.left_panel
+        # list_img = self.list_img
+        # notebook = ttk.Notebook(root)
+        # frame = tk.Frame(notebook)
+        # frame.pack()
+        # notebook.pack()
+        # frm = sf.create_scrollable_frame(frame)
+
+        # pos = 0
+        # mod = 4
+        # for i in list_img:
+        #     img = i.createMiniLabel(frm)
+        #     img.grid(row=pos // mod, column=pos %
+        #              mod, ipadx=4, ipady=4)
+        #     pos += 1
+
+    def create_right_panel(self):
+        self.rp = right_panel(self.root, self.right_panel, self.list_img)
+        self.rp.initialise()
 
 
 def main(list_tag, list_img: List[img.Img]):
@@ -45,19 +180,26 @@ def main(list_tag, list_img: List[img.Img]):
     # style.theme_use('winnative')
     # for i in style.theme_names():
     #     print(i)
-    root.title('ImageAnnotator')
 
-    frm = sf.create_scrollable_frame(root)
+    mc = main_class(list_tag, list_img, root)
+    # mc.initiate()
+    # notebook = ttk.Notebook(root)
+    # root.title('ImageAnnotator')
+    # frame = tk.Frame(notebook)
+    # frame.pack()
+    # notebook.pack()
+    # frm = sf.create_scrollable_frame(frame)
 
-    pos = 0
-    mod = 4
-    for i in list_img:
-        img = i.createMiniLabel(frm)
-        img.grid(row=pos // mod, column=pos %
-                 mod, ipadx=4, ipady=4)
-        pos += 1
+    # pos = 0
+    # mod = 4
+    # for i in list_img:
+    #     img = i.createMiniLabel(frm)
+    #     img.grid(row=pos // mod, column=pos %
+    #              mod, ipadx=4, ipady=4)
+    #     pos += 1
 
     root.minsize(400, 300)
+    # notebook.add(frame, text="All images")
     root.mainloop()
 
 

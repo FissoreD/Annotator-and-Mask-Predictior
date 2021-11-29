@@ -71,19 +71,30 @@ class Img:
         imgLabel.bind("<Button>", self.mouseClick)
         return imgLabel
 
+    def createMiniLabel2(self, frm):
+        photo = ImageTk.PhotoImage(self.img)
+        imgLabel = tk.Label(frm, image=photo, anchor=tk.CENTER)
+        imgLabel.image2 = photo
+        self.imgLabel2: tk.Label = imgLabel
+        self.imgLabelConfigs2 = [imgLabel.config()]
+        imgLabel.bind("<Enter>", self.mouseEnter)
+        imgLabel.bind("<Leave>", self.mouseLeave)
+        return imgLabel
+
+    def select(self, b):
+        if self.is_selected != b:
+            self.mouseClick(None)
+
     def mouseClick(self, event):
-        if event.num == 3:
-            pass
-        if event.num == 1:
-            if self.is_selected:
-                self.imgLabel.config(relief="flat",
-                                     bg="SystemButtonFace", fg="SystemButtonFace")
-                self.is_selected = not self.is_selected
-            else:
-                self.imgLabel.config(relief="sunken",
-                                     bg="gray51", fg="white")
-                self.is_selected = not self.is_selected
-            print(self.path, "Mouse click")
+        if self.is_selected:
+            self.imgLabel.config(relief="flat",
+                                 bg="SystemButtonFace", fg="SystemButtonFace")
+            self.is_selected = not self.is_selected
+        else:
+            self.imgLabel.config(relief="sunken",
+                                 bg="gray51", fg="white")
+            self.is_selected = not self.is_selected
+        print(self.path, "Mouse click")
 
     def mouseEnter(self, event):
         print(self.path, "Mouse entered")
