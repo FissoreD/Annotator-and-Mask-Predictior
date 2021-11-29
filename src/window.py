@@ -5,6 +5,7 @@
         ask for images to image_reader library
 """
 
+from os import execlpe
 from tkinter import Scrollbar, ttk
 from PIL import ImageTk, Image
 import images as img
@@ -38,14 +39,14 @@ class right_panel:
 
     def initialise(self):
         self.tc = self.theme_class(self)
-        self.sb = self.select_option(self, self.lp)
+        self.sb = self.select_option(self)
 
     class select_option:
-        def __init__(self, rp, left_panel) -> None:
+        def __init__(self, rp) -> None:
             self.rp = rp
             self.main = tk.PanedWindow(rp.father)
             self.main.pack()
-            self.lp = left_panel
+            self.lp = rp.lp
             self.create_buttons()
 
         def create_buttons(self):
@@ -84,11 +85,11 @@ class right_panel:
 
 
 class left_panel:
-    def __init__(self, father, images) -> None:
+    def __init__(self, father, images: List[img.Img]) -> None:
         self.father = father
         self.images = images
         self.notebook = ttk.Notebook(father)
-        self.notebook.pack()
+        self.notebook.pack(fill=tk.BOTH, expand=1)
         self.titles = ["All images", "Selected images", "Tags", "Help"]
         self.tabs = [tk.Frame(self.notebook) for i in range(len(self.titles))]
 
@@ -106,7 +107,7 @@ class left_panel:
         for i in self.images:
             img = i.createMiniLabel(self.under_frame1)
             img.grid(row=pos // mod, column=pos %
-                     mod, ipadx=4, ipady=4)
+                     mod, ipadx=5, ipady=5)
             pos += 1
 
         for f, i in zip(self.tabs, self.titles):
@@ -139,9 +140,11 @@ class main_class:
         self.frame = tk.PanedWindow(self.root)
         self.left_panel = tk.PanedWindow(self.frame)
         self.right_panel = tk.PanedWindow(self.frame)
-        self.left_panel.pack(side="left")
-        self.right_panel.pack(side="right")
-        self.frame.pack()
+        self.left_panel.pack(side="left", fill=tk.BOTH, expand=1)
+        self.right_panel.pack(side="right", fill=tk.Y)
+
+        self.frame.pack(fill=tk.BOTH, expand=1)
+
         self.create_left_panel()
         self.create_right_panel()
 
@@ -168,7 +171,7 @@ def main(list_tag, list_img: List[img.Img]):
     # mc.initiate()
     # root.title('ImageAnnotator')
 
-    root.minsize(400, 300)
+    root.minsize(670, 400)
     root.mainloop()
 
 

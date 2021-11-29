@@ -28,9 +28,12 @@ def open_files():
 class Img:
     def __init__(self, img_path: str) -> None:
         self.path = img_path
-        XSIZE = 100
-        YSIZE = XSIZE
-        self.img = Image.open(img_path).resize((XSIZE, YSIZE), Image.ANTIALIAS)
+        image = Image.open(img_path)
+        width, height = image.size
+        maxSize = 120
+        XSIZE = maxSize if width > height else maxSize*width//height
+        YSIZE = maxSize if height > width else maxSize*height//width
+        self.img = image.resize((XSIZE, YSIZE), Image.ANTIALIAS)
         self.tag: dict = dict()
         self.tag_list: set = set()
         self.is_selected = False
