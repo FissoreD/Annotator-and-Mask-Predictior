@@ -7,7 +7,6 @@
 from typing import List
 from os import listdir
 from PIL import Image, UnidentifiedImageError
-import shapely
 import json
 from PIL import ImageTk, Image
 import tkinter as tk
