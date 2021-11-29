@@ -63,8 +63,7 @@ class Img:
 
     def createMiniLabel(self, frm):
         photo = ImageTk.PhotoImage(self.img)
-        imgLabel = tk.Label(frm.scrollable_frame,
-                            image=photo, anchor=tk.CENTER)
+        imgLabel = tk.Label(frm, image=photo, anchor=tk.CENTER)
         imgLabel.image = photo
         self.imgLabel: tk.Label = imgLabel
         self.imgLabelConfigs = [imgLabel.config()]
@@ -74,15 +73,18 @@ class Img:
         return imgLabel
 
     def mouseClick(self, event):
-        if self.is_selected:
-            self.imgLabel.config(relief="flat",
-                                 bg="SystemButtonFace", fg="SystemButtonFace")
-            self.is_selected = not self.is_selected
-        else:
-            self.imgLabel.config(relief="sunken",
-                                 bg="gray51", fg="white")
-            self.is_selected = not self.is_selected
-        print(self.path, "Mouse click")
+        if event.num == 3:
+            pass
+        if event.num == 1:
+            if self.is_selected:
+                self.imgLabel.config(relief="flat",
+                                     bg="SystemButtonFace", fg="SystemButtonFace")
+                self.is_selected = not self.is_selected
+            else:
+                self.imgLabel.config(relief="sunken",
+                                     bg="gray51", fg="white")
+                self.is_selected = not self.is_selected
+            print(self.path, "Mouse click")
 
     def mouseEnter(self, event):
         print(self.path, "Mouse entered")

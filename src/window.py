@@ -12,7 +12,7 @@ from typing import Collection, List
 from tkinter.constants import HORIZONTAL
 import tkinter as tk
 import tags
-from scrollableframe import ScrollableFrame
+import scrollableframe as sf
 
 
 def get_selected_images(list_images: List[img.Img]):
@@ -47,7 +47,7 @@ def main(list_tag, list_img: List[img.Img]):
     #     print(i)
     root.title('ImageAnnotator')
 
-    frm = ScrollableFrame(root)
+    frm = sf.create_scrollable_frame(root)
 
     pos = 0
     mod = 4
@@ -57,8 +57,7 @@ def main(list_tag, list_img: List[img.Img]):
                  mod, ipadx=4, ipady=4)
         pos += 1
 
-    frm.pack()
-    root.resizable(False, False)
+    root.minsize(400, 300)
     root.mainloop()
 
 
