@@ -29,25 +29,27 @@ class ImageMakeRect():
 
 
 class right_panel:
-    def __init__(self, root, father, list_image) -> None:
+    def __init__(self, root, father, list_image, left_panel) -> None:
         self.root = root
         self.father = father
         self.main_panel = tk.PanedWindow(father)
         self.list_img = list_image
+        self.lp = left_panel
 
     def initialise(self):
         self.tc = self.theme_class(self)
-        self.sb = self.select_option(self)
+        self.sb = self.select_option(self, self.lp)
 
     class select_option:
-        def __init__(self, rp) -> None:
+        def __init__(self, rp, left_panel) -> None:
             self.rp = rp
             self.main = tk.PanedWindow(rp.father)
             self.main.pack()
+            self.lp = left_panel
             self.create_buttons()
 
         def create_buttons(self):
-            self.lab = tk.Label(self.main, text='Check/Unceck box')
+            self.lab = tk.Label(self.main, text='Check/Uncheck box')
             self.button_pane = tk.PanedWindow(self.main)
             self.b1 = tk.Button(self.button_pane, text='CheckAll')
             self.b2 = tk.Button(self.button_pane, text='UncheckAll')
@@ -61,6 +63,7 @@ class right_panel:
         def listener(self, select_all):
             for i in self.rp.list_img:
                 i.select(select_all)
+            self.lp.updateSelected(None)
 
     class theme_class:
         def __init__(self, rp) -> None:
@@ -99,14 +102,8 @@ class left_panel:
         self.notebook.bind("<<NotebookTabChanged>>", self.updateSelected)
 
         pos = 0
-        pos2 = 0
         mod = 4
         for i in self.images:
-            if i.is_selected:
-                img = i.createMiniLabel(self.under_frame2)
-                img.grid(row=pos // mod, column=pos %
-                         mod, ipadx=4, ipady=4)
-                pos2 += 1
             img = i.createMiniLabel(self.under_frame1)
             img.grid(row=pos // mod, column=pos %
                      mod, ipadx=4, ipady=4)
@@ -152,30 +149,16 @@ class main_class:
         self.lp = left_panel(self.left_panel, self.list_img)
         self.lp.initialise()
 
-        # root = self.left_panel
-        # list_img = self.list_img
-        # notebook = ttk.Notebook(root)
-        # frame = tk.Frame(notebook)
-        # frame.pack()
-        # notebook.pack()
-        # frm = sf.create_scrollable_frame(frame)
-
-        # pos = 0
-        # mod = 4
-        # for i in list_img:
-        #     img = i.createMiniLabel(frm)
-        #     img.grid(row=pos // mod, column=pos %
-        #              mod, ipadx=4, ipady=4)
-        #     pos += 1
-
     def create_right_panel(self):
-        self.rp = right_panel(self.root, self.right_panel, self.list_img)
+        self.rp = right_panel(self.root, self.right_panel,
+                              self.list_img, self.lp)
         self.rp.initialise()
 
 
 def main(list_tag, list_img: List[img.Img]):
 
     root = tk.Tk()
+
     # style = ttk.Style(root)
     # style.theme_use('winnative')
     # for i in style.theme_names():
@@ -183,23 +166,9 @@ def main(list_tag, list_img: List[img.Img]):
 
     mc = main_class(list_tag, list_img, root)
     # mc.initiate()
-    # notebook = ttk.Notebook(root)
     # root.title('ImageAnnotator')
-    # frame = tk.Frame(notebook)
-    # frame.pack()
-    # notebook.pack()
-    # frm = sf.create_scrollable_frame(frame)
-
-    # pos = 0
-    # mod = 4
-    # for i in list_img:
-    #     img = i.createMiniLabel(frm)
-    #     img.grid(row=pos // mod, column=pos %
-    #              mod, ipadx=4, ipady=4)
-    #     pos += 1
 
     root.minsize(400, 300)
-    # notebook.add(frame, text="All images")
     root.mainloop()
 
 
