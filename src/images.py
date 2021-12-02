@@ -39,7 +39,8 @@ class Img:
         XSIZE = maxSize if width > height else maxSize*width//height
         YSIZE = maxSize if height > width else maxSize*height//width
         self.img = image.resize((XSIZE, YSIZE), Image.ANTIALIAS)
-        self.tag: dict = dict()
+        self.tag_of_points: dict = dict()
+        self.tag_of_rect: dict = dict()
         self.tag_list: set = set()
         self.is_selected = False
 
