@@ -14,6 +14,7 @@ from tkinter.constants import HORIZONTAL
 import tkinter as tk
 import tags
 import scrollableframe as sf
+import help_panel
 
 
 def get_selected_images(list_images: List[img.Img]):
@@ -95,6 +96,7 @@ class left_panel:
 
         self.under_frame1 = sf.create_scrollable_frame(self.tabs[0])
         self.under_frame2 = sf.create_scrollable_frame(self.tabs[1])
+        help_panel.main(self.tabs[3])
 
     def initialise(self):
         for f in self.tabs:

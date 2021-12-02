@@ -20,15 +20,12 @@ def find_image(img_path, list_img: List[img.Img]):
 
 
 def read_file(file_name: str, list_img: List[img.Img]):
-
     with open("output.json") as fp:
-        D = (json.load(fp))
+        D = json.load(fp)
         for elt in D:
             img = find_image(elt[0], list_img)
             for tag_name in elt[1]:
-                print(tag_name, elt[1][tag_name])
                 for coor in elt[1][tag_name]:
-                    print(coor)
                     img.add_tag(tag_name, coor[0][0],
                                 coor[0][1], coor[1][0], coor[1][1])
 
@@ -44,11 +41,16 @@ def write_file(list_img: List[img.Img], file_name: str):
 if __name__ == '__main__':
     tag_list = tags.Tag(img.open_files())
     img_list = tag_list.imgs
+    for i in img_list:
+        i.set_tag_list(tag_list)
     img_list[0].add_tag('tipo', 0, 2, 3, 7)
     img_list[0].add_tag('tipo', 0, 2, 999, 7)
-    img_list[5].add_tag('ffff', 0, 99, 3, 7)
-    print(write_file(img_list, "file_name"))
+    img_list[0].add_tag('t1', 0, 2, 3, 9)
+    img_list[1].add_tag('ffff', 0, 99, 3, 7)
+    write_file(img_list, "file_name")
     tag_list.remove('tipo')
     tag_list.remove('ffff')
+    tag_list.remove('t1')
     print(img_list)
-    print(read_file('file_name', img_list))
+    read_file('file_name', img_list)
+    print(img_list)
