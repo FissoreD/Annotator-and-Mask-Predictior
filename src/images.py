@@ -10,6 +10,8 @@ from PIL import Image, UnidentifiedImageError
 import json
 from PIL import ImageTk, Image
 import tkinter as tk
+from tkinter import ttk
+import annotator
 path_to_image: str = "../img"
 
 
@@ -46,7 +48,7 @@ class Img:
         if tag in self.tag:
             self.tag[tag].append(((x1, y1), (x2, y2)))
         else:
-            self.tag[tag] = ((x1, y1), (x2, y2))
+            self.tag[tag] = [[(x1, y1), (x2, y2)]]
 
     def remove_tag(self, tag):
         if tag in self.tag:
@@ -82,6 +84,7 @@ class Img:
         self.imgLabelConfigs2 = [imgLabel.config()]
         imgLabel.bind("<Enter>", self.mouseEnter)
         imgLabel.bind("<Leave>", self.mouseLeave)
+        imgLabel.bind("<Button-1>", lambda e: annotator.main(frm))
         return imgLabel
 
     def select(self, b):
