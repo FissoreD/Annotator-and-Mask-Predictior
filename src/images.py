@@ -15,7 +15,6 @@ import annotator
 import shapely
 import itertools
 from shapely.geometry import box
-
 path_to_image: str = "../img"
 
 
@@ -40,8 +39,7 @@ class Img:
         XSIZE = maxSize if width > height else maxSize*width//height
         YSIZE = maxSize if height > width else maxSize*height//width
         self.img = image.resize((XSIZE, YSIZE), Image.ANTIALIAS)
-        self.tag_of_points: dict = dict()
-        self.tag_of_rect: dict = dict()
+        self.tag: dict = dict()
         self.tag_list: set = set()
         self.is_selected = False
 
@@ -71,16 +69,16 @@ class Img:
             self.tag_of_rect[tag] = [box_from_coord]
 
     def remove_tag(self, tag):
-        if tag in self.tag_list:
-            self.tag_list.pop(tag)
+        if tag in self.tag:
+            self.tag.pop(tag)
 
     def update_tag(self, old_value, new_value):
-        if old_value in self.tag_of_points:
-            old_coord = self.tag_of_points.pop(old_value)
-            self.tag_of_points[new_value] = old_coord
+        if old_value in self.tag:
+            old_coord = self.tag.pop(old_value)
+            self.tag[new_value] = old_coord
 
     def __str__(self) -> str:
-        return json.dumps((self.path, self.tag_of_points))
+        return json.dumps((self.path, self.tag))
 
     def __repr__(self):
         return self.__str__()
@@ -99,12 +97,12 @@ class Img:
     def createMiniLabel2(self, frm):
         photo = ImageTk.PhotoImage(self.img)
         imgLabel = tk.Label(frm, image=photo, anchor=tk.CENTER)
-        imgLabel.image2 = photo
+        imgLabel.image = photo
         self.imgLabel2: tk.Label = imgLabel
         self.imgLabelConfigs2 = [imgLabel.config()]
         imgLabel.bind("<Enter>", self.mouseEnter)
         imgLabel.bind("<Leave>", self.mouseLeave)
-        imgLabel.bind("<Button-1>", lambda e: annotator.main(frm))
+        imgLabel.bind("<Button-1>", lambda e: annotator.main(frm, self))
         return imgLabel
 
     def select(self, b):
