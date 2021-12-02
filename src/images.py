@@ -79,7 +79,7 @@ class Img:
             self.tag[new_value] = old_coord
 
     def __str__(self) -> str:
-        return json.dumps((self.path, self.tag))
+        return json.dumps((self.path, self.tag_of_points))
 
     def __repr__(self):
         return self.__str__()
@@ -90,8 +90,6 @@ class Img:
         imgLabel.image = photo
         self.imgLabel: tk.Label = imgLabel
         self.imgLabelConfigs = [imgLabel.config()]
-        imgLabel.bind("<Enter>", self.mouseEnter)
-        imgLabel.bind("<Leave>", self.mouseLeave)
         imgLabel.bind("<Button>", self.mouseClick)
         return imgLabel
 
@@ -101,8 +99,6 @@ class Img:
         imgLabel.image = photo
         self.imgLabel2: tk.Label = imgLabel
         self.imgLabelConfigs2 = [imgLabel.config()]
-        imgLabel.bind("<Enter>", self.mouseEnter)
-        imgLabel.bind("<Leave>", self.mouseLeave)
         imgLabel.bind("<Button-1>", lambda e: annotator.main(frm, self))
         return imgLabel
 
@@ -120,12 +116,6 @@ class Img:
                                  bg="gray51", fg="white")
             self.is_selected = not self.is_selected
         print(self.path, "Mouse click")
-
-    def mouseEnter(self, event):
-        print(self.path, "Mouse entered")
-
-    def mouseLeave(self, event):
-        print(self.path, "Mouse left")
 
 
 if __name__ == '__main__':
