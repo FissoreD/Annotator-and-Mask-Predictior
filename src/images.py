@@ -12,6 +12,10 @@ from PIL import ImageTk, Image
 import tkinter as tk
 from tkinter import ttk
 import annotator
+import shapely
+import itertools
+from shapely.geometry import box
+
 path_to_image: str = "../img"
 
 
@@ -36,7 +40,8 @@ class Img:
         XSIZE = maxSize if width > height else maxSize*width//height
         YSIZE = maxSize if height > width else maxSize*height//width
         self.img = image.resize((XSIZE, YSIZE), Image.ANTIALIAS)
-        self.tag: dict = dict()
+        self.tag_of_points: dict = dict()
+        self.tag_of_rect: dict = dict()
         self.tag_list: set = set()
         self.is_selected = False
 
@@ -44,23 +49,38 @@ class Img:
         self.tag_list = l
 
     def add_tag(self, tag, x1, y1, x2, y2):
-        self.tag_list.add(tag)
-        if tag in self.tag:
-            self.tag[tag].append(((x1, y1), (x2, y2)))
+        coords = [[x1, y1], [x2, y2]]
+        box_from_coord = box(x1, y1, x2, y2)
+        if abs(x1-x2) <= 5 or abs(y1-y2) <= 5 or box_from_coord.area <= 40:
+            # TODO : add popUp
+            print('Trop petit')
+            return
+        for i in list(itertools.chain(*self.tag_of_rect.values())):
+            if (box_from_coord.contains(i)):
+                print(box_from_coord, 'contains', i)
+            elif (i.contains(box_from_coord)):
+                print(box_from_coord, 'is contained in', i)
+            else:
+                print(box_from_coord.intersects(i))
+        if tag in self.tag_of_points:
+            self.tag_of_points[tag].append(coords)
+            self.tag_of_rect[tag].append(box_from_coord)
         else:
-            self.tag[tag] = [[(x1, y1), (x2, y2)]]
+            self.tag_list.add(tag)
+            self.tag_of_points[tag] = [coords]
+            self.tag_of_rect[tag] = [box_from_coord]
 
     def remove_tag(self, tag):
-        if tag in self.tag:
-            self.tag.pop(tag)
+        if tag in self.tag_list:
+            self.tag_list.pop(tag)
 
     def update_tag(self, old_value, new_value):
-        if old_value in self.tag:
-            old_coord = self.tag.pop(old_value)
-            self.tag[new_value] = old_coord
+        if old_value in self.tag_of_points:
+            old_coord = self.tag_of_points.pop(old_value)
+            self.tag_of_points[new_value] = old_coord
 
     def __str__(self) -> str:
-        return json.dumps((self.path, self.tag))
+        return json.dumps((self.path, self.tag_of_points))
 
     def __repr__(self):
         return self.__str__()

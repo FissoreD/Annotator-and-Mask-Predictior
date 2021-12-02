@@ -33,7 +33,7 @@ def read_file(file_name: str, list_img: List[img.Img]):
 def write_file(list_img: List[img.Img], file_name: str):
     L = []
     for elt in list_img:
-        L.append([elt.path, elt.tag])
+        L.append([elt.path, elt.tag_of_points])
     with open("output.json", "w") as fp:
         json.dump(L, fp)
 
@@ -43,14 +43,13 @@ if __name__ == '__main__':
     img_list = tag_list.imgs
     for i in img_list:
         i.set_tag_list(tag_list)
-    img_list[0].add_tag('tipo', 0, 2, 3, 7)
-    img_list[0].add_tag('tipo', 0, 2, 999, 7)
-    img_list[0].add_tag('t1', 0, 2, 3, 9)
-    img_list[1].add_tag('ffff', 0, 99, 3, 7)
-    write_file(img_list, "file_name")
-    tag_list.remove('tipo')
-    tag_list.remove('ffff')
-    tag_list.remove('t1')
-    print(img_list)
-    read_file('file_name', img_list)
-    print(img_list)
+    img_list[0].add_tag('tipo', 4, 5, 999, 888)
+    img_list[0].add_tag('tipo', 0, 2, 444, 555)
+    img_list[0].add_tag('tipo', 1000, 1000, 2000, 2000)
+    img_list[0].add_tag('t1', 0, 2, 333, 222)
+    img_list[1].add_tag('ffff', 0, 99, 111, 666)
+    # write_file(img_list, "file_name")
+    # tag_list.remove('tipo')
+    # tag_list.remove('ffff')
+    # tag_list.remove('t1')
+    # read_file('file_name', img_list)
