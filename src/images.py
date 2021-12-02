@@ -47,27 +47,39 @@ class Img:
     def set_tag_list(self, l):
         self.tag_list = l
 
-    def add_tag(self, tag, x1, y1, x2, y2):
+    def add_tag(self, tag, x1, y1, x2, y2, rect_id):
+        x1, x2, y1, y2 = min(x1, x2), max(x1, x2), min(y1, y2), max(y1, y2)
         coords = [[x1, y1], [x2, y2]]
         box_from_coord = box(x1, y1, x2, y2)
         if abs(x1-x2) <= 5 or abs(y1-y2) <= 5 or box_from_coord.area <= 40:
             # TODO : add popUp
             print('Trop petit')
-            return
-        for i in list(itertools.chain(*self.tag_of_rect.values())):
+            return False
+        for (pos, (i, r)) in enumerate(list(itertools.chain(*self.tag_of_rect.values()))):
             if (box_from_coord.contains(i)):
                 print(box_from_coord, 'contains', i)
+                return 'contains', r
             elif (i.contains(box_from_coord)):
                 print(box_from_coord, 'is contained in', i)
-            else:
-                print(box_from_coord.intersects(i))
+                return 'contained', r
+            elif box_from_coord.intersects(i):
+                a1 = box_from_coord.area
+                a2 = i.area
+                if box_from_coord.intersection(i).area/a1 >= 0.2:
+                    print('New rect cover more then 40% an existing shape')
+                    return 'overlap', r
+                elif box_from_coord.intersection(i).area/a2 >= 0.2:
+                    print('New rect is covered for more then 40% an existing shape')
+                    return 'overlapped', r
+
         if tag in self.tag_of_points:
             self.tag_of_points[tag].append(coords)
-            self.tag_of_rect[tag].append(box_from_coord)
+            self.tag_of_rect[tag].append([box_from_coord, rect_id])
         else:
             self.tag_list.add(tag)
             self.tag_of_points[tag] = [coords]
-            self.tag_of_rect[tag] = [box_from_coord]
+            self.tag_of_rect[tag] = [[box_from_coord, rect_id]]
+        return True
 
     def remove_tag(self, tag):
         if tag in self.tag:
