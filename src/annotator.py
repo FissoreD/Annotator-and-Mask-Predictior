@@ -11,6 +11,7 @@ class annotator:
         self.window.title("Annotator")
         self.window.focus()
         self.window.grab_set()
+        self.window.wm_resizable(False, False)
 
         self.rect_list = []
 
@@ -19,18 +20,15 @@ class annotator:
         mainPanel = tk.PanedWindow(self.window, bg='red')
         mainPanel.grid(row=0, column=0)
 
-        # img = Image.open(image.path)
+        im1 = Image.open(image.path)
+        maxSize = 500
+        XSIZE = maxSize if im1.width > im1.height else maxSize * im1.width//im1.height
+        YSIZE = maxSize if im1.height > im1.width else maxSize * im1.height//im1.width
 
-        # img.resize((500, 500), Image.ANTIALIAS)
-        # photo = ImageTk.PhotoImage(img)
-        # imgLabel = tk.Label(mainPanel, image=photo, anchor=tk.CENTER)
-        # imgLabel.image = photo
-        # self.imgLabel: tk.Label = imgLabel
-        # imgLabel.place(relx=0.5, rely=0.5, anchor='center')
-
-        im = tk.PhotoImage(file=image.path)
-        self.canvas = tk.Canvas(mainPanel, width=400, height=300)
-        self.canvas.create_image(200, 150, image=im)
+        im1 = im1.resize((XSIZE, YSIZE), Image.ANTIALIAS)
+        im = ImageTk.PhotoImage(im1)
+        self.canvas = tk.Canvas(mainPanel, height=YSIZE, width=XSIZE)
+        self.canvas.create_image(im.width()/2, im.height()/2, image=im)
         self.canvas.image = im
         self.canvas.pack()
 
@@ -41,7 +39,7 @@ class annotator:
                 rec_id = self.create_rec(x, y, x1, y1)
                 image.tag_of_rect[tag_name][pos][1] = rec_id
 
-        mainPanel.pack()
+        mainPanel.pack(fill=tk.BOTH, expand=1)
 
         self.mainPanel = mainPanel
         self.is_clicked = False
@@ -68,6 +66,8 @@ class annotator:
                 pass
             self.old_coords = (x, y)
         else:
+            # TODO add popup allowing to choose yout tag
+            # to replace 'test'
             res = self.image.add_tag(
                 'test', *self.old_coords, event.x, event.y, self.r)
             if res == False:
