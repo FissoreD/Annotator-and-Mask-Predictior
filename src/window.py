@@ -16,6 +16,7 @@ import tags
 import scrollableframe as sf
 import help_panel
 import read_write
+import tag_panel
 
 
 def get_selected_images(list_images: List[img.Img]):
@@ -90,7 +91,7 @@ class right_panel:
 
 
 class left_panel:
-    def __init__(self, father, images: List[img.Img]) -> None:
+    def __init__(self, father, images: List[img.Img], tags) -> None:
         self.father = father
         self.images = images
         self.notebook = ttk.Notebook(father)
@@ -100,6 +101,7 @@ class left_panel:
 
         self.under_frame1 = sf.create_scrollable_frame(self.tabs[0])
         self.under_frame2 = sf.create_scrollable_frame(self.tabs[1])
+        tag_panel.main(self.tabs[2], tags)
         help_panel.main(self.tabs[3])
 
     def initialise(self):
@@ -118,6 +120,7 @@ class left_panel:
 
         for f, i in zip(self.tabs, self.titles):
             self.notebook.add(f, text=i)
+        self.notebook.select(self.notebook.tabs()[2])
 
     def updateSelected(self, event):
 
@@ -155,7 +158,7 @@ class main_class:
         self.create_right_panel()
 
     def create_left_panel(self):
-        self.lp = left_panel(self.left_panel, self.list_img)
+        self.lp = left_panel(self.left_panel, self.list_img, self.list_tag)
         self.lp.initialise()
 
     def create_right_panel(self):
@@ -186,6 +189,6 @@ if __name__ == '__main__':
     tag_list = tags.Tag(img.open_files())
     img_list = tag_list.imgs
 
-    for i in img_list:
-        i.set_tag_list(tag_list)
+    for j in img_list:
+        j.set_tag_list(tag_list)
     main(tag_list, img_list)

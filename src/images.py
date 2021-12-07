@@ -110,19 +110,17 @@ class Img:
 
     def createMiniLabel(self, frm):
         photo = ImageTk.PhotoImage(self.img)
-        imgLabel = tk.Label(frm, image=photo, anchor=tk.CENTER)
+        imgLabel = tk.Label(frm, image=photo)
         imgLabel.image = photo
         self.imgLabel: tk.Label = imgLabel
-        self.imgLabelConfigs = [imgLabel.config()]
         imgLabel.bind("<Button>", self.mouseClick)
         return imgLabel
 
     def createMiniLabel2(self, frm):
         photo = ImageTk.PhotoImage(self.img)
-        imgLabel = tk.Label(frm, image=photo, anchor=tk.CENTER)
+        imgLabel = tk.Label(frm, image=photo)
         imgLabel.image = photo
         self.imgLabel2: tk.Label = imgLabel
-        self.imgLabelConfigs2 = [imgLabel.config()]
         imgLabel.bind("<Button-1>", lambda e: annotator.main(frm, self))
         return imgLabel
 
