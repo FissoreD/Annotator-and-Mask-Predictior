@@ -4,6 +4,7 @@
         - list the options of objects linked to the image, and create 
           an association
 """
+import re
 from typing import List
 from os import listdir
 from PIL import Image, UnidentifiedImageError
@@ -81,9 +82,20 @@ class Img:
             self.tag_of_rect[tag] = [[box_from_coord, rect_id]]
         return True
 
+    def delete_from_id(self, id):
+        for tag in self.tag_of_rect:
+            for pos, elt in enumerate(self.tag_of_rect[tag]):
+                if elt[1] == id:
+                    self.tag_of_points[tag].pop(pos)
+                    self.tag_of_rect[tag].pop(pos)
+                    if len(self.tag_of_points[tag]) == 0:
+                        self.tag_of_points.pop(tag)
+                        self.tag_of_rect.pop(tag)
+                    return
+
     def remove_tag(self, tag):
-        if tag in self.tag:
-            self.tag.pop(tag)
+        self.tag_of_points.pop(tag, None)
+        self.tag_of_rect.pop(tag, None)
 
     def update_tag(self, old_value, new_value):
         if old_value in self.tag:
