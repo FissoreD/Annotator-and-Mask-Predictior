@@ -7,6 +7,7 @@ class Tag(set):
         self.imgs: List[images.Img] = imgs
 
     def add(self, __object) -> None:
+        print('addin', __object)
         return super().add(__object)
 
     def remove(self, __value):

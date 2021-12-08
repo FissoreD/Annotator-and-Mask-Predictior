@@ -6,15 +6,17 @@
 """
 
 from os import execlpe
-from tkinter import Scrollbar, ttk
-from PIL import ImageTk, Image
+from tkinter import ttk
+from PIL import ImageTk
 import images as img
-from typing import Collection, List
+from typing import List
 from tkinter.constants import HORIZONTAL
 import tkinter as tk
 import tags
 import scrollableframe as sf
 import help_panel
+import read_write
+import tag_panel
 
 
 def get_selected_images(list_images: List[img.Img]):
@@ -34,13 +36,16 @@ class right_panel:
     def __init__(self, root, father, list_image, left_panel) -> None:
         self.root = root
         self.father = father
-        self.main_panel = tk.PanedWindow(father)
         self.list_img = list_image
         self.lp = left_panel
 
     def initialise(self):
         self.tc = self.theme_class(self)
         self.sb = self.select_option(self)
+        self.save = tk.Button(self.father, text='SaveToFile')
+        self.save.bind('<Button>', lambda x: read_write.write_file(
+            self.list_img, 'test'))
+        self.save.pack()
 
     class select_option:
         def __init__(self, rp) -> None:
@@ -86,7 +91,7 @@ class right_panel:
 
 
 class left_panel:
-    def __init__(self, father, images: List[img.Img]) -> None:
+    def __init__(self, father, images: List[img.Img], tags) -> None:
         self.father = father
         self.images = images
         self.notebook = ttk.Notebook(father)
@@ -96,6 +101,7 @@ class left_panel:
 
         self.under_frame1 = sf.create_scrollable_frame(self.tabs[0])
         self.under_frame2 = sf.create_scrollable_frame(self.tabs[1])
+        tag_panel.main(self.tabs[2], tags)
         help_panel.main(self.tabs[3])
 
     def initialise(self):
@@ -114,6 +120,7 @@ class left_panel:
 
         for f, i in zip(self.tabs, self.titles):
             self.notebook.add(f, text=i)
+        self.notebook.select(self.notebook.tabs()[2])
 
     def updateSelected(self, event):
 
@@ -151,7 +158,7 @@ class main_class:
         self.create_right_panel()
 
     def create_left_panel(self):
-        self.lp = left_panel(self.left_panel, self.list_img)
+        self.lp = left_panel(self.left_panel, self.list_img, self.list_tag)
         self.lp.initialise()
 
     def create_right_panel(self):
@@ -182,6 +189,6 @@ if __name__ == '__main__':
     tag_list = tags.Tag(img.open_files())
     img_list = tag_list.imgs
 
-    for i in img_list:
-        i.set_tag_list(tag_list)
+    for j in img_list:
+        j.set_tag_list(tag_list)
     main(tag_list, img_list)
