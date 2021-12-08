@@ -6,6 +6,7 @@ from PIL import ImageTk
 
 class annotator:
     def __init__(self, frm, image):
+        self.tag_list = image.tag_list
         self.frm = frm
         self.window = tk.Toplevel(self.frm)
         self.window.title("Annotator")
@@ -66,23 +67,18 @@ class annotator:
                 pass
             self.old_coords = (x, y)
         else:
-            # TODO add popup allowing to choose yout tag
-            # to replace 'test'
+            chosen_tag = self.set_tag_for_annotation()
             res = self.image.add_tag(
-                'test', *self.old_coords, event.x, event.y, self.r)
+                chosen_tag, *self.old_coords, event.x, event.y, self.r)
             if res == False:
                 self.delete_elt(self.r)
                 # TODO: Add popup to say that the window is too small
                 return
-            if type(res) == tuple:
+            elif type(res) == tuple:
                 info, other = res
                 if info == 'contains':
-                    # self.canvas.itemconfigure(other, outline='red')
-                    # self.canvas.itemconfigure(self.r, outline='green')
                     self.delete_elt(self.r)
                 elif info == 'contained':
-                    # self.canvas.itemconfigure(other, outline='green')
-                    # self.canvas.itemconfigure(self.r, outline='red')
                     self.delete_elt(self.r)
                 elif info == 'overlap':
                     self.delete_elt(self.r)
@@ -90,7 +86,6 @@ class annotator:
                     self.delete_elt(self.r)
 
     def delete_elt(self, r):
-        # TODO : remove rect also in list of rect of image !!!
         self.canvas.delete(r[0])
         self.canvas.delete(r[1])
         self.image.delete_from_id(r)
@@ -112,17 +107,30 @@ class annotator:
                 min(x1, x2), min(y1, y2), image=self.rect_list[-1], anchor='nw')
         return img, self.canvas.create_rectangle(x1, y1, x2, y2, **kwargs)
 
-    def open(self):
-        self.window.deiconify()
+    def set_tag_for_annotation(self):
+        window = tk.Toplevel(self.window)
+        window.title("Set tag")
+        window.focus()
+        window.grab_set()
+        window.wm_resizable(False, False)
 
-    def clear(self, event):
-        print('ciao')
-        self.canvas.delete('all')
+        L = list(self.image.tag_list)
+        x = L[0]
 
-    def close(self):
-        self.window.withdraw()
+        variable = tk.StringVar(window)
+        variable.set(x)
+
+        opt = tk.OptionMenu(window, variable, *L)
+        opt.config(width=8, font=('Helvetica', 12))
+        opt.pack()
+
+        def on_change():
+            x = variable.get()
+            window.destroy()
+        butt = tk.Button(window, text='Send', command=on_change)
+        butt.pack()
+        return x
 
 
 def main(frm, frame):
-    annot = annotator(frm, frame)
-    return annot.open()
+    annotator(frm, frame)

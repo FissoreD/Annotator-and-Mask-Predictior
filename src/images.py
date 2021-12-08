@@ -121,7 +121,8 @@ class Img:
         imgLabel = tk.Label(frm, image=photo)
         imgLabel.image = photo
         self.imgLabel2: tk.Label = imgLabel
-        imgLabel.bind("<Button-1>", lambda e: annotator.main(frm, self))
+        imgLabel.bind(
+            "<Button-1>", lambda e: annotator.main(frm, self))
         return imgLabel
 
     def select(self, b):
@@ -137,7 +138,6 @@ class Img:
             self.imgLabel.config(relief="sunken",
                                  bg="gray51", fg="white")
             self.is_selected = not self.is_selected
-        print(self.path, "Mouse click")
 
 
 if __name__ == '__main__':

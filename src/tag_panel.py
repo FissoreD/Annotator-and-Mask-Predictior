@@ -12,12 +12,12 @@ class tag_panel(tk.Frame):
         self.upper_pane = create_scrollable_frame(self.main_pane)
         self.bottom_pane = tk.PanedWindow(self.main_pane)
         self.tag_list = tag_list
-        self.all_tags()
-        self.down_menu()
+        self.buttons: List[tk.Button] = []
         self.bottom_pane.pack(expand=1, fill=tk.BOTH)
         self.main_pane.pack(expand=1, fill=tk.BOTH)
         self.pack(expand=1, fill=tk.BOTH)
-        self.buttons: List[tk.Button] = []
+        self.all_tags()
+        self.down_menu()
 
     def all_tags(self):
         def remove_button(e):

@@ -27,7 +27,6 @@ class ImageMakeRect():
     def __init__(self, root, image: img.Img) -> None:
         self.canvas = tk.Canvas(root, width=300, height=300)
         self.canvas.pack()
-        print(image.img)
         self.img = ImageTk.PhotoImage(image.img)
         self.canvas.create_image(20, 20, anchor=tk.NW, image=img)
 
@@ -191,4 +190,5 @@ if __name__ == '__main__':
 
     for j in img_list:
         j.set_tag_list(tag_list)
+    tag_list.add('Test')
     main(tag_list, img_list)
