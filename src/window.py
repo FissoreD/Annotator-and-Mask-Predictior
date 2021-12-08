@@ -42,8 +42,12 @@ class right_panel:
         self.tc = self.theme_class(self)
         self.sb = self.select_option(self)
         self.save = tk.Button(self.father, text='SaveToFile')
-        self.save.bind('<Button>', lambda x: read_write.write_file(
-            self.list_img, 'test'))
+        self.save.bind('<Button>',
+                       lambda x: read_write.write_file(self.list_img, 'test'))
+        self.load = tk.Button(self.father, text='LoadFile')
+        self.load.bind('<Button>',
+                       lambda x: read_write.read_file(self.list_img, 'test'))
+        self.load.pack()
         self.save.pack()
 
     class select_option:
