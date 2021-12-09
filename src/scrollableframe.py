@@ -2,7 +2,7 @@ from tkinter import ttk
 import tkinter as tk
 
 
-class create_scrollable_frame(tk.Frame):
+class create_scrollable_frame(ttk.Frame):
     def __init__(self, master) -> None:
         c1 = ttk.Frame(master)
         c2 = ttk.Frame(c1)

@@ -17,6 +17,7 @@ import scrollableframe as sf
 import help_panel
 import read_write
 import tag_panel
+from ttkthemes import ThemedTk
 
 
 def get_selected_images(list_images: List[img.Img]):
@@ -77,7 +78,6 @@ class right_panel:
             self.style = ttk.Style(self.rp.root)
             themes = self.style.theme_names()
             self.variable.set(themes[0])
-            print(self.style)
             self.variable.trace("w", self.callback)
             opt = ttk.OptionMenu(self.rp.father, self.variable, *themes)
             opt.pack(side='top')
@@ -165,7 +165,7 @@ class main_class:
 
 def main(list_tag, list_img: List[img.Img]):
 
-    root = tk.Tk()
+    root = ThemedTk(theme='black')
 
     # style = ttk.Style(root)
     # style.theme_use('winnative')
