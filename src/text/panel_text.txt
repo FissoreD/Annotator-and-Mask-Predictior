@@ -1,5 +1,0 @@
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-Cras fermentum, magna non imperdiet blandit, nulla sem porta mi, in posuere enim magna vel quam. Duis ac lobortis sem. 
-Donec nec dolor non libero mollis fringilla quis non tellus. Sed malesuada at urna ut hendrerit. 
-Curabitur vehicula a risus id ornare. Sed porta nec enim id egestas. Donec quis enim ac odio condimentum rhoncus. 
-Nam feugiat condimentum augue vel suscipit. In non accumsan sem.

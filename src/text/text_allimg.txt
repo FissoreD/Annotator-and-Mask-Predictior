@@ -1,0 +1,3 @@
+In this panel there are all the images of our library.
+To select one image you can click on it, however if you want to select all the images, you can click on the right button 'CheckAll'.
+To unselect an image, as for the selection, you can click on it. To unselect all the images, you can click on the 'UncheckAll' button.
