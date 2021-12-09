@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import time
 from PIL import Image
 from PIL import ImageTk
@@ -20,7 +21,7 @@ class annotator:
 
         self.image = image
 
-        mainPanel = tk.PanedWindow(self.window, bg='red')
+        mainPanel = ttk.PanedWindow(self.window)
         mainPanel.grid(row=0, column=0)
 
         im1 = Image.open(image.path)
@@ -129,16 +130,15 @@ class annotator:
             variable = tk.StringVar(window)
             variable.set(x)
 
-            opt = tk.OptionMenu(window, variable, *L)
-            opt.config(width=8, font=('Helvetica', 12))
-            opt.pack()
+        opt = ttk.OptionMenu(window, variable, *L)
+        opt.pack()
 
-            def on_change():
-                x = variable.get()
-                window.destroy()
-                self.tag_list.rename("&#Undefined", x)
-            butt = tk.Button(window, text='Send', command=on_change)
-            butt.pack(expand=1, fill=tk.BOTH)
+        def on_change():
+            x = variable.get()
+            window.destroy()
+            self.tag_list.rename("&#Undefined", x)
+        butt = tk.Button(window, text='Send', command=on_change)
+        butt.pack(expand=1, fill=tk.BOTH)
         entry = tk.Entry(window)
         entry.pack(expand=1, fill=tk.BOTH)
 
@@ -151,7 +151,8 @@ class annotator:
             self.tag_list.rename("&#Undefined", x)
             window.destroy()
 
-        creator = tk.Button(window, text="Create And Send", command=create_tag)
+        creator = ttk.Button(
+            window, text="Create And Send", command=create_tag)
         creator.pack(expand=1, fill=tk.BOTH)
 
 
