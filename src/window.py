@@ -5,9 +5,7 @@
         ask for images to image_reader library
 """
 
-from os import execlpe
-from tkinter import ttk
-from PIL import ImageTk
+from tkinter import Frame, ttk
 import images as img
 from typing import List
 from tkinter.constants import HORIZONTAL
@@ -88,6 +86,7 @@ class right_panel:
 
 class left_panel:
     def __init__(self, father, images: List[img.Img], tags) -> None:
+        self.mod = 4
         self.father = father
         self.images = images
         self.notebook = ttk.Notebook(father)
@@ -96,41 +95,43 @@ class left_panel:
         self.tabs = [ttk.Frame(self.notebook) for i in range(len(self.titles))]
 
         self.under_frame1 = sf.create_scrollable_frame(self.tabs[0])
+        f1 = ttk.Frame(self.under_frame1)
+        self.under_frame1.canvas.bind(
+            '<Configure>', lambda e: f1.config(width=e.width))
+
         self.under_frame2 = sf.create_scrollable_frame(self.tabs[1])
-        tags.tag_panel = tag_panel.main(self.tabs[2], tags)
+        f2 = ttk.Frame(self.under_frame2)
+        self.under_frame2.canvas.bind(
+            '<Configure>', lambda e:  f2.config(width=e.width))
+        f1.grid(columnspan=self.mod)
+        f2.grid(columnspan=self.mod)
+        self.f2 = f2
+        tags.tag_panel = tag_panel.tag_panel(self.tabs[2], tags)
         help_panel.main(self.tabs[3])
 
     def initialise(self):
         for f in self.tabs:
             f.pack()
-
         self.notebook.bind("<<NotebookTabChanged>>", self.updateSelected)
-
-        pos = 0
-        mod = 4
-        for i in self.images:
-            img = i.createMiniLabel(self.under_frame1)
-            img.grid(row=pos // mod, column=pos %
-                     mod, ipadx=5, ipady=5)
-            pos += 1
-
+        for pos, i in enumerate(self.images):
+            self.create_img(i, self.under_frame1, pos)
         for f, i in zip(self.tabs, self.titles):
             self.notebook.add(f, text=i)
         self.notebook.select(self.notebook.tabs()[2])
 
-    def updateSelected(self, event):
-
-        pos = 0
-        mod = 4
+    def updateSelected(self, _):
         if self.notebook.index(self.notebook.select()) == 1:
             for widget in self.under_frame2.winfo_children():
-                widget.destroy()
-            for i in self.images:
-                if i.is_selected:
-                    img = i.createMiniLabel2(self.under_frame2)
-                    img.grid(row=pos // mod, column=pos %
-                             mod, ipadx=4, ipady=4)
-                    pos += 1
+                None if widget == self.f2 else widget.grid_forget()
+            img = [img for img in self.images if img.is_selected]
+            for pos, i in enumerate(img):
+                self.create_img(i, self.under_frame2, pos)
+
+    def create_img(self, i,  frm: Frame, pos):
+        img = i.createMiniLabel2(
+            self.under_frame2) if frm == self.under_frame2 else i.createMiniLabel(self.under_frame1)
+        img.grid(row=pos // self.mod, column=pos %
+                 self.mod, ipadx=5, ipady=5, sticky='nswe')
 
 
 class main_class:
@@ -166,17 +167,9 @@ class main_class:
 def main(list_tag, list_img: List[img.Img]):
 
     root = ThemedTk(theme='black')
+    main_class(list_tag, list_img, root)
 
-    # style = ttk.Style(root)
-    # style.theme_use('winnative')
-    # for i in style.theme_names():
-    #     print(i)
-
-    mc = main_class(list_tag, list_img, root)
-    # mc.initiate()
-    # root.title('ImageAnnotator')
-
-    root.minsize(670, 400)
+    root.minsize(750, 480)
     root.mainloop()
 
 

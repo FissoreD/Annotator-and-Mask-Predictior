@@ -17,6 +17,7 @@ class create_scrollable_frame(ttk.Frame):
             "<Configure>", lambda e: canvas.configure(
                 scrollregion=canvas.bbox("all"))
         )
+
         canvas.create_window(0, 0, window=self, anchor="nw")
 
         canvas.configure(yscrollcommand=vertBar.set,
@@ -28,3 +29,5 @@ class create_scrollable_frame(ttk.Frame):
         canvas.pack(side="left", fill="both", expand=True)
         vertBar.pack(side="right", fill="y")
         horBar.pack(side="bottom", fill="x")
+        self.canvas = canvas
+        self.horBar = c2

@@ -8,34 +8,35 @@ from scrollableframe import create_scrollable_frame
 class tag_panel(ttk.Frame):
     def __init__(self, master, tag_list: Tag) -> None:
         super().__init__(master)
+        self.mod = 3
         self.main_pane = ttk.PanedWindow(self)
         self.upper_pane = create_scrollable_frame(self.main_pane)
+        f1 = tk.Frame(self.upper_pane)
+        self.upper_pane.canvas.bind(
+            '<Configure>', lambda e: f1.config(width=e.width))
         self.bottom_pane = ttk.PanedWindow(self.main_pane)
         self.tag_list = tag_list
         self.buttons: List[ttk.Button] = []
-        self.bottom_pane.pack(expand=1, fill=tk.BOTH)
+        self.bottom_pane.pack(fill=tk.BOTH)
         self.main_pane.pack(expand=1, fill=tk.BOTH)
         self.pack(expand=1, fill=tk.BOTH)
+        f1.grid(columnspan=self.mod, row=100)
         self.all_tags()
         self.down_menu()
 
     def all_tags(self):
         def remove_button(e):
+            self.buttons.remove(e.widget)
             self.tag_list.remove(e.widget['text'])
             e.widget.grid_forget()
-        mod = 8
         [i.grid_forget() for i in self.buttons]
-        for (pos, elt) in enumerate(sorted(list(self.tag_list))):
-            if elt == "&#undefined":
-                continue
-            buttomI = ttk.Button(self.upper_pane, text=elt, width=4)
-            buttomI.grid(row=pos // mod,
-                         column=pos % mod,
-                         ipadx=5, ipady=5, sticky='nesw')
+        self.buttons = []
+        for (pos, elt) in enumerate(sorted(list(self.tag_list - {'&#undefined'}))):
+            buttomI = ttk.Button(self.upper_pane, text=elt)
+            buttomI.grid(row=pos // self.mod, column=pos %
+                         self.mod, sticky='nsew')
             buttomI.bind('<Button>', remove_button)
             self.buttons.append(buttomI)
-        self.upper_pane.grid_rowconfigure(0, weight=1)
-        self.upper_pane.grid_columnconfigure(0, weight=1)
 
     def down_menu(self):
         add_tag = ttk.Button(self.bottom_pane, text='Add tag',
@@ -44,10 +45,9 @@ class tag_panel(ttk.Frame):
 
     def add_tag_listener(self):
         def on_change(e):
+            [i.grid_forget() for i in self.buttons]
             self.tag_list.add(e.widget.get())
             window.destroy()
-            [i.grid_forget() for i in self.buttons]
-            self.all_tags()
         window = tk.Toplevel(self)
         window.title("Add tag")
         window.focus()
@@ -59,7 +59,3 @@ class tag_panel(ttk.Frame):
         entry.pack()
         entry.focus()
         entry.bind("<Return>", on_change)
-
-
-def main(parent, tag):
-    return tag_panel(parent, tag)
