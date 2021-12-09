@@ -25,8 +25,8 @@ class tag_panel(ttk.Frame):
             e.widget.grid_forget()
         mod = 8
         [i.grid_forget() for i in self.buttons]
-        for (pos, elt) in enumerate(self.tag_list):
-            if elt == "&#Undefined":
+        for (pos, elt) in enumerate(sorted(list(self.tag_list))):
+            if elt == "&#undefined":
                 continue
             buttomI = ttk.Button(self.upper_pane, text=elt, width=4)
             buttomI.grid(row=pos // mod,

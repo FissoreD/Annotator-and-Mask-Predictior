@@ -8,7 +8,7 @@ class Tag(set):
         self.tag_panel = None
 
     def add(self, __object) -> None:
-        temp = super().add(__object)
+        temp = super().add(__object.capitalize())
         self.refresh()
         return temp
 

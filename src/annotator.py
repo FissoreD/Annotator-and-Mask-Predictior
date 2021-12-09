@@ -71,7 +71,7 @@ class annotator:
             self.old_coords = (x, y)
         else:
             res = self.image.add_tag(
-                "&#Undefined", *self.old_coords, event.x, event.y, self.r)
+                "&#undefined", *self.old_coords, event.x, event.y, self.r)
             if res == False:
                 self.delete_elt(self.r, "The selected zone is too small")
                 return
@@ -96,12 +96,14 @@ class annotator:
         self.canvas.delete(r[0])
         self.canvas.delete(r[1])
         self.image.delete_from_id(r)
-        messagebox.showinfo("Warning", errorMsg)
+        if errorMsg != "":
+            messagebox.showinfo("Warning", errorMsg)
 
     def create_rec(self, x, y, x1, y1):
         r = self.create_rectangle(
             x, y, x1, y1, width=2, fill='green', alpha=.5)
-        self.canvas.tag_bind(r[0], '<Button-3>', lambda x: self.delete_elt(r))
+        self.canvas.tag_bind(r[0], '<Button-3>',
+                             lambda x: self.delete_elt(r, ""))
         return r
 
     def create_rectangle(self, x1, y1, x2, y2, **kwargs):
@@ -122,7 +124,7 @@ class annotator:
         window.grab_set()
         window.wm_resizable(False, False)
 
-        L = [i for i in self.image.tag_list if i != "&#Undefined"]
+        L = [i for i in self.image.tag_list if i != "&#undefined"]
 
         if len(L) != 0:
             x = L[0]
@@ -130,17 +132,18 @@ class annotator:
             variable = tk.StringVar(window)
             variable.set(x)
 
-        opt = ttk.OptionMenu(window, variable, *L)
-        opt.pack()
+            opt = ttk.OptionMenu(window, variable, *L)
+            opt.pack()
 
-        def on_change():
-            x = variable.get()
-            window.destroy()
-            self.tag_list.rename("&#Undefined", x)
-        butt = tk.Button(window, text='Send', command=on_change)
-        butt.pack(expand=1, fill=tk.BOTH)
-        entry = tk.Entry(window)
-        entry.pack(expand=1, fill=tk.BOTH)
+            def on_change():
+                x = variable.get()
+                window.destroy()
+                self.window.focus()
+                self.window.grab_set()
+                self.tag_list.rename("&#undefined", x)
+            butt = ttk.Button(window, text='Send', command=on_change)
+            butt.pack(expand=1, fill=tk.BOTH)
+        entry = ttk.Entry(window)
 
         def create_tag():
             x = entry.get()
@@ -148,8 +151,13 @@ class annotator:
                 messagebox.showinfo("Error", "Invalid Tag name")
                 return
             self.tag_list.add(x)
-            self.tag_list.rename("&#Undefined", x)
+            self.tag_list.rename("&#undefined", x)
             window.destroy()
+            self.window.focus()
+            self.window.grab_set()
+
+        entry.bind("<Return>", lambda e: create_tag())
+        entry.pack(expand=1, fill=tk.BOTH)
 
         creator = ttk.Button(
             window, text="Create And Send", command=create_tag)
