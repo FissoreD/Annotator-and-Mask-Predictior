@@ -1,12 +1,13 @@
 import tkinter as tk
 from tkinter.constants import LEFT
+from tkinter import ttk
 
 from read_write import read_file
 
 
 def left_panel(parent):
-    panel_left = tk.PanedWindow(parent)
-    panel_right = tk.PanedWindow(parent)
+    panel_left = ttk.PanedWindow(parent)
+    panel_right = ttk.PanedWindow(parent)
     all_img_button = tk.Button(panel_left, text='All images', relief='solid', activebackground='#F9FC77', cursor='hand2',
                                width=20, command=lambda: (right_panel(panel_right)))
     selected_button = tk.Button(panel_left, text='Selected images', relief='solid', activebackground='#F9FC77', cursor='hand2',
@@ -21,7 +22,7 @@ def left_panel(parent):
 
 
 def right_empty_panel(parent):
-    panel_right_empty = tk.PanedWindow(parent)
+    panel_right_empty = ttk.PanedWindow(parent)
     panel_right_empty.pack()
 
 
@@ -32,7 +33,7 @@ def clean_panel(panel):
 def right_panel(parent):
     clean_panel(parent)
     T = tk.Text(parent, width=40)
-    file = open('text/panel_text.txt', 'r')
+    file = open('text/text_allimg.txt', 'r')
     data = file.read()
     T.pack()
     T.insert(tk.END, data)
@@ -61,11 +62,10 @@ def right_panel2(parent):
     file.close()
 
 
-# inserire i testi
-# collegarli ai diversi bottoni
-# abbellire tutto, inserendo anche immagini
-
-
 
 def main(parent):
     left_panel(parent)
+
+
+#completare i testi
+#sistemarli nella finestra di visualizzazione
