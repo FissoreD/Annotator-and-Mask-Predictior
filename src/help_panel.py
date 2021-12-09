@@ -7,16 +7,17 @@ from read_write import read_file
 def left_panel(parent):
     panel_left = tk.PanedWindow(parent)
     panel_right = tk.PanedWindow(parent)
-    all_img_button = tk.Button(panel_left, text='All images',
+    all_img_button = tk.Button(panel_left, text='All images', relief='solid', activebackground='#F9FC77', cursor='hand2',
                                width=20, command=lambda: (right_panel(panel_right)))
-    selected_button = tk.Button(panel_left, text='Selected images',
+    selected_button = tk.Button(panel_left, text='Selected images', relief='solid', activebackground='#F9FC77', cursor='hand2',
                                 width=20, command=lambda: (right_panel1(panel_right)))
-    tag_button = tk.Button(panel_left, text='Tags', width=20)
+    tag_button = tk.Button(panel_left, text='Tags', relief='solid', activebackground='#F9FC77', cursor='hand2', width=20, command=lambda: (right_panel2(panel_right)))
     all_img_button.grid(column=0, row=1)
     selected_button.grid(column=0, row=2, pady=10)
     tag_button.grid(column=0, row=3)
     panel_left.pack(side="left")
     panel_right.pack()
+
 
 
 def right_empty_panel(parent):
@@ -30,28 +31,40 @@ def clean_panel(panel):
 
 def right_panel(parent):
     clean_panel(parent)
-    T = tk.Text(parent, width=30)
+    T = tk.Text(parent, width=40)
     file = open('text/panel_text.txt', 'r')
     data = file.read()
     T.pack()
     T.insert(tk.END, data)
+    T.configure(state='disabled', background='#F0F0F0', relief='solid', font=("Comic Sans", 10, "italic"))
     file.close()
 
 
 def right_panel1(parent):
     clean_panel(parent)
-    T = tk.Text(parent, width=30)
-    file = open('text/panel_text1.txt', 'r')
+    T = tk.Text(parent, width=40)
+    file = open('text/text_selectimg.txt', 'r')
+    data = file.read()
+    T.pack()
+    T.insert(tk.END, data) 
+    T.configure(state='disabled', background='#F0F0F0', relief='solid',  font=("Comic Sans", 10, "italic"))
+    file.close()
+
+def right_panel2(parent):
+    clean_panel(parent)
+    T = tk.Text(parent, width=40)
+    file = open('text/text_tags.txt', 'r')
     data = file.read()
     T.pack()
     T.insert(tk.END, data)
+    T.configure(state='disabled', background='#F0F0F0', relief='solid',  font=("Comic Sans", 10, "italic"))
     file.close()
 
-# distruggere il panel prima di aprire quello nuovo cliccando sul bottone
+
 # inserire i testi
 # collegarli ai diversi bottoni
 # abbellire tutto, inserendo anche immagini
-# se non trovo come pulire il panel, creo un panel in quello più grande che poi verrà distrutto
+
 
 
 def main(parent):
