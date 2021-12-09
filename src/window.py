@@ -104,7 +104,7 @@ class left_panel:
 
         self.under_frame1 = sf.create_scrollable_frame(self.tabs[0])
         self.under_frame2 = sf.create_scrollable_frame(self.tabs[1])
-        tag_panel.main(self.tabs[2], tags)
+        tags.tag_panel = tag_panel.main(self.tabs[2], tags)
         help_panel.main(self.tabs[3])
 
     def initialise(self):

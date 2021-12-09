@@ -98,9 +98,11 @@ class Img:
         self.tag_of_rect.pop(tag, None)
 
     def update_tag(self, old_value, new_value):
-        if old_value in self.tag:
-            old_coord = self.tag.pop(old_value)
-            self.tag[new_value] = old_coord
+        if old_value in self.tag_of_points:
+            old_coord1 = self.tag_of_points.pop(old_value)
+            old_coord2 = self.tag_of_rect.pop(old_value)
+            self.tag_of_points[new_value] = old_coord1
+            self.tag_of_rect[new_value] = old_coord2
 
     def __str__(self) -> str:
         return json.dumps((self.path, self.tag_of_points))

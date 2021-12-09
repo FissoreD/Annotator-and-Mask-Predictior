@@ -24,8 +24,10 @@ class tag_panel(tk.Frame):
             self.tag_list.remove(e.widget['text'])
             e.widget.grid_forget()
         mod = 8
+        [i.grid_forget() for i in self.buttons]
         for (pos, elt) in enumerate(self.tag_list):
-            print(elt)
+            if elt == "&#Undefined":
+                continue
             buttomI = tk.Button(self.upper_pane, text=elt, width=4)
             buttomI.grid(row=pos // mod,
                          column=pos % mod,
@@ -60,4 +62,4 @@ class tag_panel(tk.Frame):
 
 
 def main(parent, tag):
-    tag_panel(parent, tag)
+    return tag_panel(parent, tag)
