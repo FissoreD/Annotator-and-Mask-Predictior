@@ -23,14 +23,6 @@ def get_selected_images(list_images: List[img.Img]):
     return [i for i in list_images if i.is_selected]
 
 
-class ImageMakeRect():
-    def __init__(self, root, image: img.Img) -> None:
-        self.canvas = tk.Canvas(root, width=300, height=300)
-        self.canvas.pack()
-        self.img = ImageTk.PhotoImage(image.img)
-        self.canvas.create_image(20, 20, anchor=tk.NW, image=img)
-
-
 class right_panel:
     def __init__(self, root, father, list_image, left_panel) -> None:
         self.root = root
@@ -41,10 +33,10 @@ class right_panel:
     def initialise(self):
         self.tc = self.theme_class(self)
         self.sb = self.select_option(self)
-        self.save = tk.Button(self.father, text='SaveToFile')
+        self.save = ttk.Button(self.father, text='SaveToFile')
         self.save.bind('<Button>',
                        lambda x: read_write.write_file(self.list_img, 'test'))
-        self.load = tk.Button(self.father, text='LoadFile')
+        self.load = ttk.Button(self.father, text='LoadFile')
         self.load.bind('<Button>',
                        lambda x: read_write.read_file(self.list_img, 'test'))
         self.load.pack()
@@ -53,16 +45,16 @@ class right_panel:
     class select_option:
         def __init__(self, rp) -> None:
             self.rp = rp
-            self.main = tk.PanedWindow(rp.father)
+            self.main = ttk.PanedWindow(rp.father)
             self.main.pack()
             self.lp = rp.lp
             self.create_buttons()
 
         def create_buttons(self):
-            self.lab = tk.Label(self.main, text='Check/Uncheck box')
-            self.button_pane = tk.PanedWindow(self.main)
-            self.b1 = tk.Button(self.button_pane, text='CheckAll')
-            self.b2 = tk.Button(self.button_pane, text='UncheckAll')
+            self.lab = ttk.Label(self.main, text='Check/Uncheck box')
+            self.button_pane = ttk.PanedWindow(self.main)
+            self.b1 = ttk.Button(self.button_pane, text='CheckAll')
+            self.b2 = ttk.Button(self.button_pane, text='UncheckAll')
             self.b1.bind("<Button-1>", lambda e: self.listener(True))
             self.b2.bind("<Button-1>", lambda e: self.listener(False))
             self.b1.pack(side="left")
@@ -85,8 +77,9 @@ class right_panel:
             self.style = ttk.Style(self.rp.root)
             themes = self.style.theme_names()
             self.variable.set(themes[0])
+            print(self.style)
             self.variable.trace("w", self.callback)
-            opt = tk.OptionMenu(self.rp.father, self.variable, *themes)
+            opt = ttk.OptionMenu(self.rp.father, self.variable, *themes)
             opt.pack(side='top')
 
         def callback(self, *args):
@@ -100,11 +93,11 @@ class left_panel:
         self.notebook = ttk.Notebook(father)
         self.notebook.pack(fill=tk.BOTH, expand=1)
         self.titles = ["All images", "Selected images", "Tags", "Help"]
-        self.tabs = [tk.Frame(self.notebook) for i in range(len(self.titles))]
+        self.tabs = [ttk.Frame(self.notebook) for i in range(len(self.titles))]
 
         self.under_frame1 = sf.create_scrollable_frame(self.tabs[0])
         self.under_frame2 = sf.create_scrollable_frame(self.tabs[1])
-        tag_panel.main(self.tabs[2], tags)
+        tags.tag_panel = tag_panel.main(self.tabs[2], tags)
         help_panel.main(self.tabs[3])
 
     def initialise(self):
@@ -149,9 +142,9 @@ class main_class:
         self.initiate()
 
     def initiate(self):
-        self.frame = tk.PanedWindow(self.root)
-        self.left_panel = tk.PanedWindow(self.frame)
-        self.right_panel = tk.PanedWindow(self.frame)
+        self.frame = ttk.PanedWindow(self.root)
+        self.left_panel = ttk.PanedWindow(self.frame)
+        self.right_panel = ttk.PanedWindow(self.frame)
         self.left_panel.pack(side="left", fill=tk.BOTH, expand=1)
         self.right_panel.pack(side="right", fill=tk.Y)
 

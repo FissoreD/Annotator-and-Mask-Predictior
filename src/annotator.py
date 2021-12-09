@@ -1,7 +1,10 @@
 import tkinter as tk
+from tkinter import ttk
 import time
 from PIL import Image
 from PIL import ImageTk
+import time
+from tkinter import messagebox
 
 
 class annotator:
@@ -18,7 +21,7 @@ class annotator:
 
         self.image = image
 
-        mainPanel = tk.PanedWindow(self.window, bg='red')
+        mainPanel = ttk.PanedWindow(self.window)
         mainPanel.grid(row=0, column=0)
 
         im1 = Image.open(image.path)
@@ -67,28 +70,33 @@ class annotator:
                 pass
             self.old_coords = (x, y)
         else:
-            chosen_tag = self.set_tag_for_annotation()
             res = self.image.add_tag(
-                chosen_tag, *self.old_coords, event.x, event.y, self.r)
+                "&#Undefined", *self.old_coords, event.x, event.y, self.r)
             if res == False:
-                self.delete_elt(self.r)
-                # TODO: Add popup to say that the window is too small
+                self.delete_elt(self.r, "The selected zone is too small")
                 return
             elif type(res) == tuple:
                 info, other = res
                 if info == 'contains':
-                    self.delete_elt(self.r)
+                    self.delete_elt(
+                        self.r, "New zone convers an existing zone")
                 elif info == 'contained':
-                    self.delete_elt(self.r)
-                elif info == 'overlap':
-                    self.delete_elt(self.r)
+                    self.delete_elt(
+                        self.r, "New zone is convered by an existing zone")
                 elif info == 'overlapped':
-                    self.delete_elt(self.r)
+                    self.delete_elt(
+                        self.r, "New zone overlaps more than 20% of an existing zone")
+                elif info == 'overlap':
+                    self.delete_elt(
+                        self.r, "More than 20% of new zone is overlapped by an existing zone")
+            else:
+                self.set_tag_for_annotation()
 
-    def delete_elt(self, r):
+    def delete_elt(self, r, errorMsg):
         self.canvas.delete(r[0])
         self.canvas.delete(r[1])
         self.image.delete_from_id(r)
+        messagebox.showinfo("Warning", errorMsg)
 
     def create_rec(self, x, y, x1, y1):
         r = self.create_rectangle(
@@ -114,22 +122,38 @@ class annotator:
         window.grab_set()
         window.wm_resizable(False, False)
 
-        L = list(self.image.tag_list)
-        x = L[0]
+        L = [i for i in self.image.tag_list if i != "&#Undefined"]
 
-        variable = tk.StringVar(window)
-        variable.set(x)
+        if len(L) != 0:
+            x = L[0]
 
-        opt = tk.OptionMenu(window, variable, *L)
-        opt.config(width=8, font=('Helvetica', 12))
+            variable = tk.StringVar(window)
+            variable.set(x)
+
+        opt = ttk.OptionMenu(window, variable, *L)
         opt.pack()
 
         def on_change():
             x = variable.get()
             window.destroy()
+            self.tag_list.rename("&#Undefined", x)
         butt = tk.Button(window, text='Send', command=on_change)
-        butt.pack()
-        return x
+        butt.pack(expand=1, fill=tk.BOTH)
+        entry = tk.Entry(window)
+        entry.pack(expand=1, fill=tk.BOTH)
+
+        def create_tag():
+            x = entry.get()
+            if x == "":
+                messagebox.showinfo("Error", "Invalid Tag name")
+                return
+            self.tag_list.add(x)
+            self.tag_list.rename("&#Undefined", x)
+            window.destroy()
+
+        creator = ttk.Button(
+            window, text="Create And Send", command=create_tag)
+        creator.pack(expand=1, fill=tk.BOTH)
 
 
 def main(frm, frame):
