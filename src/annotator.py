@@ -47,16 +47,26 @@ class annotator:
 
         self.mainPanel = mainPanel
         self.is_clicked = False
+
         self.canvas.bind('<Motion>', self.draw_rect_on_motion)
         self.canvas.bind('<Button-1>', self.swap)
+        self.window.bind('<Escape>', self.escape)
+
+    def deleteCurrent(self):
+        try:
+            self.canvas.delete(self.r[0])
+            self.canvas.delete(self.r[1])
+        except AttributeError:
+            pass
+
+    def escape(self, event):
+        if self.is_clicked:
+            self.is_clicked = not self.is_clicked
+            self.deleteCurrent()
 
     def draw_rect_on_motion(self, event):
         if self.is_clicked:
-            try:
-                self.canvas.delete(self.r[0])
-                self.canvas.delete(self.r[1])
-            except AttributeError:
-                pass
+            self.deleteCurrent()
             x, y = event.x, event.y
             self.r = self.create_rec(x, y, *self.old_coords)
 
