@@ -52,6 +52,24 @@ class annotator:
         self.canvas.bind('<Button-1>', self.swap)
         self.window.bind('<Escape>', self.escape)
 
+        self.m = tk.Menu(self.window, tearoff=0)
+
+    def popup(self, event, r):
+        try:
+            self.m.delete("Delete")
+            self.m.delete("Rename")
+        except:
+            pass
+
+        self.m.add_command(
+            label="Delete", command=lambda: self.delete_elt(r, ""))
+        self.m.add_command(label="Rename", command=lambda: messagebox.showinfo(
+            "Rename annotation", "Not already possible (TODO)"))
+        try:
+            self.m.tk_popup(event.x_root, event.y_root)
+        finally:
+            self.m.grab_release()
+
     def deleteCurrent(self):
         try:
             self.canvas.delete(self.r[0])
@@ -113,7 +131,7 @@ class annotator:
         r = self.create_rectangle(
             x, y, x1, y1, width=2, fill='green', alpha=.5)
         self.canvas.tag_bind(r[0], '<Button-3>',
-                             lambda x: self.delete_elt(r, ""))
+                             lambda e: self.option_for_annotation(e, r))
         return r
 
     def create_rectangle(self, x1, y1, x2, y2, **kwargs):
@@ -126,6 +144,9 @@ class annotator:
             img = self.canvas.create_image(
                 min(x1, x2), min(y1, y2), image=self.rect_list[-1], anchor='nw')
         return img, self.canvas.create_rectangle(x1, y1, x2, y2, **kwargs)
+
+    def option_for_annotation(self, event, r):
+        self.popup(event, r)
 
     def set_tag_for_annotation(self):
         window = tk.Toplevel(self.window)
