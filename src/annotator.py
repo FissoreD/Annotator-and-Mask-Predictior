@@ -6,6 +6,8 @@ from PIL import ImageTk
 import time
 from tkinter import messagebox
 
+invalid_word = "&#undefined"
+
 
 class annotator:
     def __init__(self, frm, image):
@@ -63,6 +65,7 @@ class annotator:
 
         self.m.add_command(
             label="Delete", command=lambda: self.delete_elt(r, ""))
+
         self.m.add_command(label="Rename", command=lambda: messagebox.showinfo(
             "Rename annotation", "Not already possible (TODO)"))
         try:
@@ -99,7 +102,7 @@ class annotator:
             self.old_coords = (x, y)
         else:
             res = self.image.add_tag(
-                "&#undefined", *self.old_coords, event.x, event.y, self.r)
+                invalid_word, *self.old_coords, event.x, event.y, self.r)
             if res == False:
                 self.delete_elt(self.r, "The selected zone is too small")
                 return
@@ -131,7 +134,7 @@ class annotator:
         r = self.create_rectangle(
             x, y, x1, y1, width=2, fill='green', alpha=.5)
         self.canvas.tag_bind(r[0], '<Button-3>',
-                             lambda e: self.option_for_annotation(e, r))
+                             lambda e: self.popup(e, r))
         return r
 
     def create_rectangle(self, x1, y1, x2, y2, **kwargs):
@@ -145,9 +148,6 @@ class annotator:
                 min(x1, x2), min(y1, y2), image=self.rect_list[-1], anchor='nw')
         return img, self.canvas.create_rectangle(x1, y1, x2, y2, **kwargs)
 
-    def option_for_annotation(self, event, r):
-        self.popup(event, r)
-
     def set_tag_for_annotation(self):
         window = tk.Toplevel(self.window)
         window.title("Set tag")
@@ -155,7 +155,7 @@ class annotator:
         window.grab_set()
         window.wm_resizable(False, False)
 
-        L = [i for i in self.image.tag_list if i != "&#undefined"]
+        L = [i for i in self.image.tag_list if i != invalid_word]
 
         if len(L) != 0:
             x = L[0]
@@ -171,18 +171,18 @@ class annotator:
                 window.destroy()
                 self.window.focus()
                 self.window.grab_set()
-                self.tag_list.rename("&#undefined", x)
+                self.tag_list.rename(invalid_word, x)
             butt = ttk.Button(window, text='Send', command=on_change)
             butt.pack(expand=1, fill=tk.BOTH)
         entry = ttk.Entry(window)
 
         def create_tag():
             x = entry.get()
-            if x == "":
+            if x == "" or x.capitalize() == invalid_word:
                 messagebox.showinfo("Error", "Invalid Tag name")
                 return
             self.tag_list.add(x)
-            self.tag_list.rename("&#undefined", x)
+            self.tag_list.rename(invalid_word, x)
             window.destroy()
             self.window.focus()
             self.window.grab_set()
