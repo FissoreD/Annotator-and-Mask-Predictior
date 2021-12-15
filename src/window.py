@@ -34,14 +34,14 @@ class right_panel:
 
     def initialise(self):
         self.tc = self.theme_class(self)
-        self.sb = self.select_option(self)
-        self.save = ttk.Button(self.father, text='SaveToFile')
-        self.load = ttk.Button(self.father, text='LoadFile')
+        sb = self.select_option(self)
         f1 = [read_write.write_file, read_write.read_file]
-        self.save.bind('<Button>', lambda _: f1[0](self.list_img, 'test'))
-        self.load.bind('<Button>', lambda _: f1[1](self.list_img, 'test'))
-        self.load.pack(param)
-        self.save.pack(param)
+        save = ttk.Button(self.father, text='SaveToFile',
+                          command=lambda: f1[0](self.list_img))
+        load = ttk.Button(self.father, text='LoadFile',
+                          command=lambda: f1[1](self.list_img))
+        load.pack(param)
+        save.pack(param)
 
     class select_option:
         def __init__(self, rp) -> None:

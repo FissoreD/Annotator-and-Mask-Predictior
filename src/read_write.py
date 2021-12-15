@@ -21,7 +21,7 @@ def find_image(img_path, list_img: List[img.Img]):
             return i
 
 
-def read_file(list_img: List[img.Img], file_name: str):
+def read_file(list_img: List[img.Img]):
     file = filedialog.askopenfile(filetypes=[('JSON', '.json')])
     if file == None:
         return
@@ -38,7 +38,7 @@ def read_file(list_img: List[img.Img], file_name: str):
     file.close()
 
 
-def write_file(list_img: List[img.Img], file_name: str):
+def write_file(list_img: List[img.Img]):
     file = filedialog.asksaveasfile(
         defaultextension='.json', filetypes=[('JSON', '.json')],
         initialfile='output.json')
