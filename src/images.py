@@ -4,6 +4,7 @@
         - list the options of objects linked to the image, and create 
           an association
 """
+import re
 from typing import List
 from os import listdir
 from PIL import Image, UnidentifiedImageError
@@ -52,7 +53,7 @@ class Img:
         box_from_coord = box(x1, y1, x2, y2)
         if abs(x1-x2) <= 5 or abs(y1-y2) <= 5 or box_from_coord.area <= 40:
             return False
-        for (pos, (i, r)) in enumerate(list(itertools.chain(*self.tag_of_rect.values()))):
+        for (i, r) in list(itertools.chain(*self.tag_of_rect.values())):
             if (box_from_coord.contains(i)):
                 return 'contains', r
             elif (i.contains(box_from_coord)):
@@ -73,15 +74,18 @@ class Img:
             self.tag_of_rect[tag] = [[box_from_coord, rect_id]]
         return True
 
+    def remove_if_empty(self, tag):
+        if len(self.tag_of_points[tag]) == 0:
+            self.tag_of_points.pop(tag)
+            self.tag_of_rect.pop(tag)
+
     def delete_from_id(self, id):
         for tag in self.tag_of_rect:
             for pos, elt in enumerate(self.tag_of_rect[tag]):
                 if elt[1] == id:
                     self.tag_of_points[tag].pop(pos)
                     self.tag_of_rect[tag].pop(pos)
-                    if len(self.tag_of_points[tag]) == 0:
-                        self.tag_of_points.pop(tag)
-                        self.tag_of_rect.pop(tag)
+                    self.remove_if_empty(tag)
                     return
 
     def remove_tag(self, tag):
@@ -98,9 +102,7 @@ class Img:
         old_tag, pos = self.find_tag_by_rect_id(rect_id)
         self.tag_of_rect[old_tag].pop(pos)
         coords = self.tag_of_points[old_tag].pop(pos)
-        if len(self.tag_of_points[old_tag]) == 0:
-            self.tag_of_points.pop(old_tag)
-            self.tag_of_rect.pop(old_tag)
+        self.remove_if_empty(old_tag)
         self.add_tag(new_tag_name, *coords[0], *coords[1], rect_id)
 
     def update_tag(self, old_value, new_value):
@@ -110,11 +112,9 @@ class Img:
             if new_value in self.tag_of_rect:
                 self.tag_of_points[new_value].extend(old_coord1)
                 self.tag_of_rect[new_value].extend(old_coord2)
-                print(self.tag_of_points, self.tag_of_rect)
             else:
                 self.tag_of_points[new_value] = old_coord1
                 self.tag_of_rect[new_value] = old_coord2
-                print(self.tag_of_points, self.tag_of_rect)
 
     def __str__(self) -> str:
         return json.dumps((self.path, self.tag_of_points))
@@ -122,35 +122,33 @@ class Img:
     def __repr__(self):
         return self.__str__()
 
-    def createMiniLabel(self, frm):
-        photo = ImageTk.PhotoImage(self.img)
-        imgLabel = tk.Label(frm, image=photo, anchor=tk.CENTER)
+    def create_image(parent, img):
+        photo = ImageTk.PhotoImage(img)
+        imgLabel = tk.Label(parent, image=photo, anchor=tk.CENTER)
         imgLabel.image = photo
-        self.imgLabel: tk.Label = imgLabel
+        return imgLabel
+
+    def createMiniLabel(self, frm):
+        imgLabel = Img.create_image(frm, self.img)
+        self.imgLabel = imgLabel
         imgLabel.bind("<Button>", self.mouseClick)
         return imgLabel
 
     def createMiniLabel2(self, frm):
-        photo = ImageTk.PhotoImage(self.img)
-        imgLabel = ttk.Label(frm, image=photo, anchor=tk.CENTER)
-        imgLabel.image = photo
+        imgLabel = Img.create_image(frm, self.img)
         imgLabel.bind("<Button-1>", lambda _: annotator.main(frm, self))
         return imgLabel
 
     def select(self, b):
-        if self.is_selected != b:
-            self.mouseClick(None)
+        self.mouseClick(None) if self.is_selected != b else None
 
     def mouseClick(self, event):
-        if self.is_selected:
-            self.imgLabel.config(relief="flat",
-                                 bg="SystemButtonFace",
-                                 fg="SystemButtonFace")
-            self.is_selected = not self.is_selected
-        else:
-            self.imgLabel.config(relief="sunken",
-                                 bg="gray51", fg="white")
-            self.is_selected = not self.is_selected
+        opts = [
+            {"relief": "flat", "bg": "SystemButtonFace", "fg": "SystemButtonFace"},
+            {"relief": "sunken", "bg": "gray51", "fg": "white"}
+        ]
+        self.is_selected = not self.is_selected
+        self.imgLabel.config(opts[self.is_selected])
 
 
 if __name__ == '__main__':

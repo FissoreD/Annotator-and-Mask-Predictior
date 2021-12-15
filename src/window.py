@@ -33,21 +33,20 @@ class right_panel:
         self.tc = self.theme_class(self)
         self.sb = self.select_option(self)
         self.save = ttk.Button(self.father, text='SaveToFile')
-        self.save.bind('<Button>',
-                       lambda x: read_write.write_file(self.list_img, 'test'))
         self.load = ttk.Button(self.father, text='LoadFile')
-        self.load.bind('<Button>',
-                       lambda x: read_write.read_file(self.list_img, 'test'))
+        f1 = [read_write.read_file, read_write.write_file]
+        self.save.bind('<Button>', lambda x: f1[0](self.list_img, 'test'))
+        self.load.bind('<Button>', lambda x: f1[1](self.list_img, 'test'))
         self.load.pack()
         self.save.pack()
 
     class select_option:
         def __init__(self, rp) -> None:
-            self.rp = rp
             self.main = ttk.PanedWindow(rp.father)
-            self.main.pack()
+            self.rp = rp
             self.lp = rp.lp
             self.create_buttons()
+            self.main.pack()
 
         def create_buttons(self):
             self.lab = ttk.Label(self.main, text='Check/Uncheck box')
@@ -95,23 +94,21 @@ class left_panel:
         self.tabs = [ttk.Frame(self.notebook) for i in range(len(self.titles))]
 
         self.under_frame1 = sf.create_scrollable_frame(self.tabs[0])
-        f1 = ttk.Frame(self.under_frame1)
-        self.under_frame1.canvas.bind(
-            '<Configure>', lambda e: f1.config(width=e.width))
-
         self.under_frame2 = sf.create_scrollable_frame(self.tabs[1])
-        f2 = ttk.Frame(self.under_frame2)
-        self.under_frame2.canvas.bind(
-            '<Configure>', lambda e:  f2.config(width=e.width))
-        f1.grid(columnspan=self.mod)
-        f2.grid(columnspan=self.mod)
-        self.f2 = f2
+
+        self.create_frame(self.under_frame1)
+        self.create_frame(self.under_frame2)
+
         tags.tag_panel = tag_panel.tag_panel(self.tabs[2], tags)
         help_panel.main(self.tabs[3])
 
+    def create_frame(self, parent):
+        f1 = ttk.Frame(parent)
+        parent.canvas.bind('<Configure>', lambda e: f1.config(width=e.width))
+        f1.grid(columnspan=self.mod)
+
     def initialise(self):
-        for f in self.tabs:
-            f.pack()
+        [f.pack() for f in self.tabs]
         self.notebook.bind("<<NotebookTabChanged>>", self.updateSelected)
         for pos, i in enumerate(self.images):
             self.create_img(i, self.under_frame1, pos)
@@ -122,7 +119,7 @@ class left_panel:
     def updateSelected(self, _):
         if self.notebook.index(self.notebook.select()) == 1:
             for widget in self.under_frame2.winfo_children():
-                None if widget == self.f2 else widget.grid_forget()
+                widget.grid_forget() if isinstance(widget, tk.Label) else None
             img = [img for img in self.images if img.is_selected]
             for pos, i in enumerate(img):
                 self.create_img(i, self.under_frame2, pos)

@@ -10,14 +10,18 @@ from tkinter import messagebox
 invalid_word = "&#undefined"
 
 
+def window_parametrize(window):
+    window.focus()
+    window.grab_set()
+
+
 class annotator:
     def __init__(self, frm, image):
         self.tag_list = image.tag_list
         self.frm = frm
         self.window = tk.Toplevel(self.frm)
         self.window.title("Annotator")
-        self.window.focus()
-        self.window.grab_set()
+        window_parametrize(self.window)
         self.window.wm_resizable(False, False)
 
         self.rect_list = []
@@ -152,13 +156,17 @@ class annotator:
     def set_tag_for_annotation(self, is_renaming=(False, 0)):
         window = tk.Toplevel(self.window)
         window.title("Set tag")
-        window.focus()
-        window.grab_set()
-        window.wm_resizable(False, False)
+        window_parametrize(window)
         panel = tk.PanedWindow(window)
         panel.pack(padx=10, pady=10)
 
         L = [i for i in self.image.tag_list if i != invalid_word]
+
+        def do_rename(x):
+            if is_renaming[0]:
+                self.image.rename_tag_of_rect(is_renaming[1], x)
+            else:
+                self.tag_list.rename(invalid_word, x)
 
         if len(L) != 0:
             x = L[0]
@@ -172,12 +180,8 @@ class annotator:
             def on_change():
                 x = variable.get()
                 window.destroy()
-                self.window.focus()
-                self.window.grab_set()
-                if is_renaming[0]:
-                    self.image.rename_tag_of_rect(is_renaming[1], x)
-                else:
-                    self.tag_list.rename(invalid_word, x)
+                window_parametrize(self.window)
+                do_rename(x)
             butt = ttk.Button(panel, text='Send', command=on_change)
             butt.pack(expand=1, fill=tk.BOTH)
             ttk.Separator(panel, orient='horizontal').pack(fill='x', pady=7)
@@ -189,13 +193,9 @@ class annotator:
                 messagebox.showinfo("Error", "Invalid Tag name")
                 return
             self.tag_list.add(x)
-            if is_renaming[0]:
-                self.image.rename_tag_of_rect(is_renaming[1], x)
-            else:
-                self.tag_list.rename(invalid_word, x)
+            do_rename(x)
             window.destroy()
-            self.window.focus()
-            self.window.grab_set()
+            window_parametrize(self.window)
 
         entry.bind("<Return>", lambda e: create_tag())
         entry.pack(expand=1, fill=tk.BOTH)
