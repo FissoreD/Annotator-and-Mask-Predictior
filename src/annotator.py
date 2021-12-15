@@ -197,7 +197,7 @@ class annotator:
             window.destroy()
             window_parametrize(self.window)
 
-        entry.bind("<Return>", lambda e: create_tag())
+        entry.bind("<Return>", create_tag)
         entry.pack(expand=1, fill=tk.BOTH)
 
         creator = ttk.Button(

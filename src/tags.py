@@ -4,9 +4,6 @@ import images
 
 class Tag(set):
     def __init__(self, imgs: list) -> None:
-        self.setAll(imgs)
-
-    def setAll(self, imgs):
         self.imgs: List[images.Img] = imgs
         self.tag_panel = None
 

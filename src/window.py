@@ -54,10 +54,12 @@ class right_panel:
         def charge_img_folder(self, _):
             img.path_to_image = filedialog.askdirectory()
             tag_list = self.rp.list_tag
-            tag_list.__init__(img.open_files())
+            tag_list.imgs = img.open_files()
             while self.rp.list_img:
                 self.rp.list_img.pop()
             self.rp.list_img.extend(tag_list.imgs)
+            for j in self.rp.list_img:
+                j.set_tag_list(tag_list)
             self.rp.lp.updateSelected(None)
             return
 
@@ -65,12 +67,12 @@ class right_panel:
             self.lab = ttk.Label(
                 self.main, text='Check/Uncheck box', anchor=CENTER)
             bp = ttk.PanedWindow(self.main)
-            self.b1 = ttk.Button(bp, text='CheckAll')
-            self.b2 = ttk.Button(bp, text='UncheckAll')
-            self.b3 = ttk.Button(bp, text='Open Images From Folder')
-            self.b1.bind("<Button-1>", lambda _: self.listener(True))
-            self.b2.bind("<Button-1>", lambda _: self.listener(False))
-            self.b3.bind("<Button-1>", self.charge_img_folder)
+            self.b1 = ttk.Button(bp, text='CheckAll',
+                                 command=lambda: self.listener(True))
+            self.b2 = ttk.Button(bp, text='UncheckAll',
+                                 command=lambda: self.listener(False))
+            self.b3 = ttk.Button(bp, text='Open Images From Folder',
+                                 command=lambda: self.charge_img_folder(None))
             self.b1.grid(column=0, row=0, sticky='nsew')
             self.b2.grid(column=1, row=0, sticky='nsew')
             self.b3.grid(column=0, row=1, columnspan=2, sticky='nsew')
