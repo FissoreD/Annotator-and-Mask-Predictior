@@ -1,7 +1,9 @@
+from tkinter.constants import NONE
 from typing import List
 import images as img
 import tags
 import json
+from tkinter import filedialog
 
 
 """
@@ -20,22 +22,33 @@ def find_image(img_path, list_img: List[img.Img]):
 
 
 def read_file(list_img: List[img.Img], file_name: str):
-    with open("output.json") as fp:
-        D = json.load(fp)
-        for elt in D:
-            img = find_image(elt[0], list_img)
-            for tag_name in elt[1]:
-                for coor in elt[1][tag_name]:
-                    img.add_tag(tag_name, coor[0][0],
-                                coor[0][1], coor[1][0], coor[1][1], None)
+    file = filedialog.askopenfile(filetypes=[('JSON', '.json')])
+    if file == None:
+        return
+    try:
+        D = json.load(file)
+    except UnicodeDecodeError:
+        return
+    for elt in D:
+        img = find_image(elt[0], list_img)
+        for tag_name in elt[1]:
+            for coor in elt[1][tag_name]:
+                img.add_tag(tag_name, coor[0][0],
+                            coor[0][1], coor[1][0], coor[1][1], None)
+    file.close()
 
 
 def write_file(list_img: List[img.Img], file_name: str):
+    file = filedialog.asksaveasfile(
+        defaultextension='.json', filetypes=[('JSON', '.json')],
+        initialfile='output.json')
+    if file == None:
+        return
     L = []
     for elt in list_img:
         L.append([elt.path, elt.tag_of_points])
-    with open("output.json", "w") as fp:
-        json.dump(L, fp)
+    json.dump(L, file)
+    file.close()
 
 
 if __name__ == '__main__':

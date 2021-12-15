@@ -4,14 +4,12 @@
         - list the options of objects linked to the image, and create 
           an association
 """
-import re
 from typing import List
 from os import listdir
 from PIL import Image, UnidentifiedImageError
 import json
 from PIL import ImageTk, Image
 import tkinter as tk
-from tkinter import ttk
 import annotator
 import itertools
 from shapely.geometry import box

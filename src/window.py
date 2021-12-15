@@ -5,10 +5,10 @@
         ask for images to image_reader library
 """
 
-from tkinter import Frame, ttk
+from tkinter import Frame, ttk, filedialog
 import images as img
 from typing import List
-from tkinter.constants import HORIZONTAL
+from tkinter.constants import BOTH, CENTER, HORIZONTAL
 import tkinter as tk
 import tags
 import scrollableframe as sf
@@ -17,16 +17,19 @@ import read_write
 import tag_panel
 from ttkthemes import ThemedTk
 
+param = {'expand': 1, "fill": BOTH}
+
 
 def get_selected_images(list_images: List[img.Img]):
     return [i for i in list_images if i.is_selected]
 
 
 class right_panel:
-    def __init__(self, root, father, list_image, left_panel) -> None:
+    def __init__(self, root, father, list_image, list_tag, left_panel) -> None:
         self.root = root
         self.father = father
         self.list_img = list_image
+        self.list_tag = list_tag
         self.lp = left_panel
 
     def initialise(self):
@@ -34,11 +37,11 @@ class right_panel:
         self.sb = self.select_option(self)
         self.save = ttk.Button(self.father, text='SaveToFile')
         self.load = ttk.Button(self.father, text='LoadFile')
-        f1 = [read_write.read_file, read_write.write_file]
-        self.save.bind('<Button>', lambda x: f1[0](self.list_img, 'test'))
-        self.load.bind('<Button>', lambda x: f1[1](self.list_img, 'test'))
-        self.load.pack()
-        self.save.pack()
+        f1 = [read_write.write_file, read_write.read_file]
+        self.save.bind('<Button>', lambda _: f1[0](self.list_img, 'test'))
+        self.load.bind('<Button>', lambda _: f1[1](self.list_img, 'test'))
+        self.load.pack(param)
+        self.save.pack(param)
 
     class select_option:
         def __init__(self, rp) -> None:
@@ -46,19 +49,33 @@ class right_panel:
             self.rp = rp
             self.lp = rp.lp
             self.create_buttons()
-            self.main.pack()
+            self.main.pack(param)
+
+        def charge_img_folder(self, _):
+            img.path_to_image = filedialog.askdirectory()
+            tag_list = self.rp.list_tag
+            tag_list.__init__(img.open_files())
+            while self.rp.list_img:
+                self.rp.list_img.pop()
+            self.rp.list_img.extend(tag_list.imgs)
+            self.rp.lp.updateSelected(None)
+            return
 
         def create_buttons(self):
-            self.lab = ttk.Label(self.main, text='Check/Uncheck box')
-            self.button_pane = ttk.PanedWindow(self.main)
-            self.b1 = ttk.Button(self.button_pane, text='CheckAll')
-            self.b2 = ttk.Button(self.button_pane, text='UncheckAll')
-            self.b1.bind("<Button-1>", lambda e: self.listener(True))
-            self.b2.bind("<Button-1>", lambda e: self.listener(False))
-            self.b1.pack(side="left")
-            self.b2.pack(side="right")
-            self.lab.pack()
-            self.button_pane.pack()
+            self.lab = ttk.Label(
+                self.main, text='Check/Uncheck box', anchor=CENTER)
+            bp = ttk.PanedWindow(self.main)
+            self.b1 = ttk.Button(bp, text='CheckAll')
+            self.b2 = ttk.Button(bp, text='UncheckAll')
+            self.b3 = ttk.Button(bp, text='Open Images From Folder')
+            self.b1.bind("<Button-1>", lambda _: self.listener(True))
+            self.b2.bind("<Button-1>", lambda _: self.listener(False))
+            self.b3.bind("<Button-1>", self.charge_img_folder)
+            self.b1.grid(column=0, row=0, sticky='nsew')
+            self.b2.grid(column=1, row=0, sticky='nsew')
+            self.b3.grid(column=0, row=1, columnspan=2, sticky='nsew')
+            self.lab.pack(fill=BOTH)
+            bp.pack()
 
         def listener(self, select_all):
             for i in self.rp.list_img:
@@ -73,14 +90,14 @@ class right_panel:
         def create_theme_option_panel(self):
             self.variable = tk.StringVar(self.rp.father)
             self.style = ttk.Style(self.rp.root)
-            themes = self.style.theme_names()
+            themes = [i.upper() for i in self.style.theme_names()]
             self.variable.set(themes[0])
             self.variable.trace("w", self.callback)
             opt = ttk.OptionMenu(self.rp.father, self.variable, *themes)
-            opt.pack(side='top')
+            opt.pack(side='top', fill=BOTH)
 
         def callback(self, *args):
-            self.style.theme_use(self.variable.get())
+            self.style.theme_use(self.variable.get().lower())
 
 
 class left_panel:
@@ -88,6 +105,7 @@ class left_panel:
         self.mod = 4
         self.father = father
         self.images = images
+        self.old_path = img.path_to_image
         self.notebook = ttk.Notebook(father)
         self.notebook.pack(fill=tk.BOTH, expand=1)
         self.titles = ["All images", "Selected images", "Tags", "Help"]
@@ -117,12 +135,18 @@ class left_panel:
         self.notebook.select(self.notebook.tabs()[2])
 
     def updateSelected(self, _):
-        if self.notebook.index(self.notebook.select()) == 1:
+        if self.notebook.index(self.notebook.select()) == 1 or self.old_path != img.path_to_image:
             for widget in self.under_frame2.winfo_children():
                 widget.grid_forget() if isinstance(widget, tk.Label) else None
-            img = [img for img in self.images if img.is_selected]
-            for pos, i in enumerate(img):
+            image = [image for image in self.images if image.is_selected]
+            for pos, i in enumerate(image):
                 self.create_img(i, self.under_frame2, pos)
+        if self.notebook.index(self.notebook.select()) == 0 and self.old_path != img.path_to_image:
+            for widget in self.under_frame1.winfo_children():
+                widget.grid_forget() if isinstance(widget, tk.Label) else None
+            for pos, i in enumerate(self.images):
+                self.create_img(i, self.under_frame1, pos)
+            self.old_path = img.path_to_image
 
     def create_img(self, i,  frm: Frame, pos):
         img = i.createMiniLabel2(
@@ -144,7 +168,7 @@ class main_class:
         self.left_panel = ttk.PanedWindow(self.frame)
         self.right_panel = ttk.PanedWindow(self.frame)
         self.left_panel.pack(side="left", fill=tk.BOTH, expand=1)
-        self.right_panel.pack(side="right", fill=tk.Y)
+        self.right_panel.pack(side="right", fill=tk.Y, padx=10, pady=10)
 
         self.frame.pack(fill=tk.BOTH, expand=1)
 
@@ -157,7 +181,7 @@ class main_class:
 
     def create_right_panel(self):
         self.rp = right_panel(self.root, self.right_panel,
-                              self.list_img, self.lp)
+                              self.list_img, self.list_tag, self.lp)
         self.rp.initialise()
 
 
