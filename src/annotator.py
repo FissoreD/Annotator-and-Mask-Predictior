@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import Canvas, ttk
 import time
+from tkinter.constants import BOTH
 from PIL import Image
 from PIL import ImageTk
 import time
@@ -66,8 +67,8 @@ class annotator:
         self.m.add_command(
             label="Delete", command=lambda: self.delete_elt(r, ""))
 
-        self.m.add_command(label="Rename", command=lambda: messagebox.showinfo(
-            "Rename annotation", "Not already possible (TODO)"))
+        self.m.add_command(
+            label="Rename", command=lambda: self.set_tag_for_annotation((True, r)))
         try:
             self.m.tk_popup(event.x_root, event.y_root)
         finally:
@@ -148,33 +149,39 @@ class annotator:
                 min(x1, x2), min(y1, y2), image=self.rect_list[-1], anchor='nw')
         return img, self.canvas.create_rectangle(x1, y1, x2, y2, **kwargs)
 
-    def set_tag_for_annotation(self):
+    def set_tag_for_annotation(self, is_renaming=(False, 0)):
         window = tk.Toplevel(self.window)
         window.title("Set tag")
         window.focus()
         window.grab_set()
         window.wm_resizable(False, False)
+        panel = tk.PanedWindow(window)
+        panel.pack(padx=10, pady=10)
 
         L = [i for i in self.image.tag_list if i != invalid_word]
 
         if len(L) != 0:
             x = L[0]
 
-            variable = tk.StringVar(window)
+            variable = tk.StringVar(panel)
             variable.set(x)
 
-            opt = ttk.OptionMenu(window, variable, *L)
-            opt.pack()
+            opt = ttk.OptionMenu(panel, variable, *L)
+            opt.pack(expand=1, fill=BOTH)
 
             def on_change():
                 x = variable.get()
                 window.destroy()
                 self.window.focus()
                 self.window.grab_set()
-                self.tag_list.rename(invalid_word, x)
-            butt = ttk.Button(window, text='Send', command=on_change)
+                if is_renaming[0]:
+                    self.image.rename_tag_of_rect(is_renaming[1], x)
+                else:
+                    self.tag_list.rename(invalid_word, x)
+            butt = ttk.Button(panel, text='Send', command=on_change)
             butt.pack(expand=1, fill=tk.BOTH)
-        entry = ttk.Entry(window)
+            ttk.Separator(panel, orient='horizontal').pack(fill='x', pady=7)
+        entry = ttk.Entry(panel)
 
         def create_tag():
             x = entry.get()
@@ -182,7 +189,10 @@ class annotator:
                 messagebox.showinfo("Error", "Invalid Tag name")
                 return
             self.tag_list.add(x)
-            self.tag_list.rename(invalid_word, x)
+            if is_renaming[0]:
+                self.image.rename_tag_of_rect(is_renaming[1], x)
+            else:
+                self.tag_list.rename(invalid_word, x)
             window.destroy()
             self.window.focus()
             self.window.grab_set()
@@ -191,7 +201,7 @@ class annotator:
         entry.pack(expand=1, fill=tk.BOTH)
 
         creator = ttk.Button(
-            window, text="Create And Send", command=create_tag)
+            panel, text="Create And Send", command=create_tag)
         creator.pack(expand=1, fill=tk.BOTH)
 
 

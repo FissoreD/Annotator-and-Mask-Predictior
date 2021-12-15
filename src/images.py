@@ -88,12 +88,33 @@ class Img:
         self.tag_of_points.pop(tag, None)
         self.tag_of_rect.pop(tag, None)
 
+    def find_tag_by_rect_id(self, rect_id):
+        for key, value in self.tag_of_rect.items():
+            for pos, x in enumerate(value):
+                if rect_id == x[1]:
+                    return key, pos
+
+    def rename_tag_of_rect(self, rect_id, new_tag_name):
+        old_tag, pos = self.find_tag_by_rect_id(rect_id)
+        self.tag_of_rect[old_tag].pop(pos)
+        coords = self.tag_of_points[old_tag].pop(pos)
+        if len(self.tag_of_points[old_tag]) == 0:
+            self.tag_of_points.pop(old_tag)
+            self.tag_of_rect.pop(old_tag)
+        self.add_tag(new_tag_name, *coords[0], *coords[1], rect_id)
+
     def update_tag(self, old_value, new_value):
         if old_value in self.tag_of_points:
             old_coord1 = self.tag_of_points.pop(old_value)
             old_coord2 = self.tag_of_rect.pop(old_value)
-            self.tag_of_points[new_value] = old_coord1
-            self.tag_of_rect[new_value] = old_coord2
+            if new_value in self.tag_of_rect:
+                self.tag_of_points[new_value].extend(old_coord1)
+                self.tag_of_rect[new_value].extend(old_coord2)
+                print(self.tag_of_points, self.tag_of_rect)
+            else:
+                self.tag_of_points[new_value] = old_coord1
+                self.tag_of_rect[new_value] = old_coord2
+                print(self.tag_of_points, self.tag_of_rect)
 
     def __str__(self) -> str:
         return json.dumps((self.path, self.tag_of_points))
