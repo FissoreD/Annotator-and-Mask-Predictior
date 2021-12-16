@@ -95,8 +95,9 @@ class right_panel:
             themes = [i.upper() for i in self.style.theme_names()]
             self.variable.set(themes[0])
             self.variable.trace("w", self.callback)
+            ttk.Label(self.rp.father, text= "Set theme:", anchor=CENTER).pack(fill=BOTH)
             opt = ttk.OptionMenu(self.rp.father, self.variable, *themes)
-            opt.pack(side='top', fill=BOTH)
+            opt.pack(side='top', fill=BOTH, pady=(0, 15))
 
         def callback(self, *args):
             self.style.theme_use(self.variable.get().lower())

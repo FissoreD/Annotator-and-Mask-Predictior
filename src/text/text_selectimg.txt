@@ -1,2 +1,0 @@
-In this window you can see all the images that you have selected.
-Selecting on the image, a pop-up where you can see it will open.
