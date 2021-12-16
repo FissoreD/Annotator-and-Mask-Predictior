@@ -140,7 +140,23 @@ class annotator:
             x, y, x1, y1, width=2, fill='green', alpha=.5)
         self.canvas.tag_bind(r[0], '<Button-3>',
                              lambda e: self.popup(e, r))
+        self.canvas.tag_bind(
+            r[0], '<Enter>', lambda e: self.create_tooltip(e, r, True))
         return r
+
+    def create_tooltip(self, event, r, isEntering):
+        try:
+            self.canvas.delete(self.idtooltip)
+            self.canvas.delete(self.idtooltip2)
+        except AttributeError:
+            pass
+
+        if isEntering and not self.is_clicked:
+            self.idtooltip = self.canvas.create_rectangle(
+                event.x, event.y, event.x+30, event.y+10,)
+            self.idtooltip2 = self.canvas.create_text(event.x+10, event.y+5,
+                                                      text=self.image.find_tag_by_rect_id(r))
+            self.canvas.update()
 
     def create_rectangle(self, x1, y1, x2, y2, **kwargs):
         if 'alpha' in kwargs:
