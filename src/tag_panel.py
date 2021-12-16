@@ -24,29 +24,64 @@ class tag_panel(ttk.Frame):
         self.all_tags()
         self.down_menu()
 
+        self.m = tk.Menu(self, tearoff=0)
+        self.original_background = ttk.Label().cget("background")
+
+    def popup(self, event):
+        try:
+            self.m.delete("Delete")
+            self.m.delete("Rename")
+        except:
+            pass
+
+        self.m.add_command(
+            label="Rename", command=lambda: self.add_tag_listener(isRenaming=event.widget["text"]))
+
+        self.m.add_command(
+            label="Delete", command=lambda: self.remove_button(event))
+
+        try:
+            self.m.tk_popup(event.x_root, event.y_root)
+        finally:
+            self.m.grab_release()
+
+    def remove_button(self, e):
+        self.buttons.remove(e.widget)
+        self.tag_list.remove(e.widget['text'])
+        e.widget.grid_forget()
+
     def all_tags(self):
-        def remove_button(e):
-            self.buttons.remove(e.widget)
-            self.tag_list.remove(e.widget['text'])
-            e.widget.grid_forget()
+
         [i.grid_forget() for i in self.buttons]
         self.buttons = []
         for (pos, elt) in enumerate(sorted(list(self.tag_list - {'&#undefined'}))):
-            buttomI = ttk.Button(self.upper_pane, text=elt)
+            # buttomI = ttk.Button(self.upper_pane, text=elt,
+            #                      command=lambda: self.popup())
+            buttomI = ttk.Label(self.upper_pane, text=elt, anchor=tk.CENTER)
+            buttomI.bind('<Button-1>', self.popup)
+            buttomI.bind('<Enter>', lambda e: self.hover(buttomI, True))
+            buttomI.bind('<Leave>', lambda e: self.hover(buttomI))
             buttomI.grid(row=pos // self.mod, column=pos %
                          self.mod, sticky='nsew')
-            buttomI.bind('<Button>', remove_button)
             self.buttons.append(buttomI)
+
+    def hover(self, label, isEntering=False):
+        label.config(
+            background="white" if isEntering else self.original_background)
 
     def down_menu(self):
         add_tag = ttk.Button(self.bottom_pane, text='Add tag',
                              command=self.add_tag_listener)
         add_tag.pack(expand=1, fill=tk.BOTH)
 
-    def add_tag_listener(self):
+    def add_tag_listener(self, isRenaming=None):
         def on_change(e):
             [i.grid_forget() for i in self.buttons]
-            self.tag_list.add(e.widget.get())
+            self.new_tag = e.widget.get()
+            if isRenaming != None:
+                self.tag_list.rename(isRenaming, self.new_tag)
+            else:
+                self.tag_list.add(self.new_tag)
             window.destroy()
         window = tk.Toplevel(self)
         window.title("Add tag")
