@@ -152,10 +152,12 @@ class annotator:
             pass
 
         if isEntering and not self.is_clicked:
-            self.idtooltip = self.canvas.create_rectangle(
-                event.x, event.y, event.x+30, event.y+10,)
+
             self.idtooltip2 = self.canvas.create_text(event.x+10, event.y+5,
                                                       text=self.image.find_tag_by_rect_id(r))
+            self.idtooltip = self.canvas.create_rectangle(
+                self.canvas.bbox(self.idtooltip2), fill="white")
+            self.canvas.tag_lower(self.idtooltip, self.idtooltip2)
             self.canvas.update()
 
     def create_rectangle(self, x1, y1, x2, y2, **kwargs):
