@@ -1,11 +1,12 @@
 import tkinter as tk
-from tkinter import Canvas, ttk
+from tkinter import Canvas, Event, ttk
 import time
 from tkinter.constants import BOTH
 from PIL import Image
 from PIL import ImageTk
 import time
 from tkinter import messagebox
+from tkinter import tix
 
 invalid_word = "&#undefined"
 
@@ -141,10 +142,12 @@ class annotator:
         self.canvas.tag_bind(r[0], '<Button-3>',
                              lambda e: self.popup(e, r))
         self.canvas.tag_bind(
-            r[0], '<Enter>', lambda e: self.create_tooltip(e, r, True))
+            r[0], '<Motion>', lambda e: self.create_tooltip(e, r, True))
+        self.canvas.tag_bind(
+            r[0], '<Leave>', lambda e: self.create_tooltip(e, r, False))
         return r
 
-    def create_tooltip(self, event, r, isEntering):
+    def create_tooltip(self, _, r, isEntering):
         try:
             self.canvas.delete(self.idtooltip)
             self.canvas.delete(self.idtooltip2)
@@ -152,9 +155,10 @@ class annotator:
             pass
 
         if isEntering and not self.is_clicked:
-
-            self.idtooltip2 = self.canvas.create_text(event.x+10, event.y+5,
-                                                      text=self.image.find_tag_by_rect_id(r))
+            self.idtooltip2 = self.canvas.create_text(4, self.canvas.winfo_height() - 4,
+                                                      text=self.image.find_tag_by_rect_id(
+                                                          r)[0],
+                                                      anchor='sw')
             self.idtooltip = self.canvas.create_rectangle(
                 self.canvas.bbox(self.idtooltip2), fill="white")
             self.canvas.tag_lower(self.idtooltip, self.idtooltip2)
@@ -182,9 +186,9 @@ class annotator:
 
         def do_rename(x):
             if is_renaming[0]:
-                self.image.rename_tag_of_rect(is_renaming[1], x)
+                self.image.rename_tag_of_rect(is_renaming[1], x.capitalize())
             else:
-                self.tag_list.rename(invalid_word, x)
+                self.tag_list.rename(invalid_word, x.capitalize())
 
         if len(L) != 0:
             x = L[0]
@@ -215,7 +219,7 @@ class annotator:
             window.destroy()
             window_parametrize(self.window)
 
-        entry.bind("<Return>", create_tag)
+        entry.bind("<Return>", lambda _: create_tag())
         entry.pack(expand=1, fill=tk.BOTH)
 
         creator = ttk.Button(
