@@ -1,27 +1,28 @@
 import tkinter as tk
-from tkinter.constants import LEFT
-from tkinter import ttk
+from tkinter.constants import BOTH, LEFT
+from tkinter import Frame, ttk
 from tkhtmlview import HTMLLabel
 
-from read_write import read_file
+button_properties = {
+    'relief': 'solid',
+    'activebackground': '#F9FC77',
+    'cursor': 'hand2',
+    'width': 20
+}
 
+file_path_list = [
+    'text/text_allimg.html',
+    'text/text_selectimg.html',
+    'text/text_tags.html',
+    'text/text_others.html'
+]
 
-def left_panel(parent):
-    panel_left = ttk.PanedWindow(parent)
-    panel_right = ttk.PanedWindow(parent)
-    all_img_button = tk.Button(panel_left, text='All images', relief='solid', activebackground='#F9FC77', cursor='hand2',
-                               width=20, command=lambda: (right_panel(panel_right)))
-    selected_button = tk.Button(panel_left, text='Selected images', relief='solid', activebackground='#F9FC77', cursor='hand2',
-                                width=20, command=lambda: (right_panel1(panel_right)))
-    tag_button = tk.Button(panel_left, text='Tags', relief='solid', activebackground='#F9FC77', cursor='hand2', width=20, command=lambda: (right_panel2(panel_right)))
-    others_button = tk.Button(panel_left, text='Others', relief='solid', activebackground='#F9FC77', cursor='hand2', width=20, command=lambda: (right_panel3(panel_right)))
-    all_img_button.grid(column=0, row=1)
-    selected_button.grid(column=0, row=2, pady=10)
-    tag_button.grid(column=0, row=3)
-    others_button.grid(column=0, row=4, pady=10)
-    panel_left.pack(side="left")
-    panel_right.pack()
-
+button_title = [
+    'All images',
+    'Selected images',
+    'Tags',
+    'Others'
+]
 
 
 def right_empty_panel(parent):
@@ -33,44 +34,27 @@ def clean_panel(panel):
     [i.destroy() for i in panel.winfo_children()]
 
 
-def right_panel(parent):
+def right_panel(parent, file_path):
     clean_panel(parent)
-    file = open('text/text_allimg.html', 'r')
+    file = open(file_path, 'r')
     data = file.read()
-    T = HTMLLabel(parent, html=data)
-    T.pack()
+    HTMLLabel(parent, html=data).pack(fill=BOTH, expand=1)
     file.close()
 
 
-def right_panel1(parent):
-    clean_panel(parent)
-    file = open('text/text_selectimg.html', 'r')
-    data = file.read()
-    T = HTMLLabel(parent, html=data)
-    T.pack()
-    file.close()
-
-def right_panel2(parent):
-    clean_panel(parent)
-    file = open('text/text_tags.html', 'r')
-    data = file.read()
-    T = HTMLLabel(parent, html=data)
-    T.pack()
-    file.close()
-
-def right_panel3(parent):
-    clean_panel(parent)
-    file = open('text/text_others.html', 'r')
-    data = file.read()
-    T = HTMLLabel(parent, html=data)
-    T.pack()
-    file.close()
-
+def create_button(panel_left, panel_right, pos):
+    return tk.Button(panel_left,
+                     **button_properties,
+                     text=button_title[pos],
+                     command=lambda: right_panel(panel_right, file_path_list[pos]))
 
 
 def main(parent):
-    left_panel(parent)
+    panel_left = ttk.PanedWindow(parent)
+    panel_right = ttk.PanedWindow(parent)
+    buttom_list = [create_button(panel_left, panel_right, i) for i in range(4)]
+    for pos, buttom in enumerate(buttom_list):
+        buttom.grid(column=0, row=pos, pady=5)
 
-
-#completare i testi
-#sistemarli nella finestra di visualizzazione
+    panel_left.pack(side="left")
+    panel_right.pack(expand=1, fill=BOTH)

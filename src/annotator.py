@@ -1,12 +1,9 @@
 import tkinter as tk
-from tkinter import Canvas, Event, ttk
-import time
+from tkinter import ttk
 from tkinter.constants import BOTH
 from PIL import Image
 from PIL import ImageTk
-import time
 from tkinter import messagebox
-from tkinter import tix
 
 invalid_word = "&#undefined"
 

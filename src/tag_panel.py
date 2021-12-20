@@ -1,5 +1,6 @@
+import builtins
 import tkinter as tk
-from tkinter import Pack, ttk
+from tkinter import ttk
 from typing import List
 from tags import Tag
 from scrollableframe import create_scrollable_frame
@@ -55,18 +56,17 @@ class tag_panel(ttk.Frame):
         [i.grid_forget() for i in self.buttons]
         self.buttons = []
         for (pos, elt) in enumerate(sorted(list(self.tag_list - {'&#undefined'}))):
-            # buttomI = ttk.Button(self.upper_pane, text=elt,
-            #                      command=lambda: self.popup())
-            buttomI = ttk.Label(self.upper_pane, text=elt, anchor=tk.CENTER)
+            buttomI = ttk.Label(self.upper_pane, text=elt,
+                                anchor=tk.CENTER, borderwidth=1, relief="solid")
             buttomI.bind('<Button-1>', self.popup)
-            buttomI.bind('<Enter>', lambda e: self.hover(buttomI, True))
-            buttomI.bind('<Leave>', lambda e: self.hover(buttomI))
+            buttomI.bind('<Enter>', lambda e: self.hover(e, True))
+            buttomI.bind('<Leave>', lambda e: self.hover(e))
             buttomI.grid(row=pos // self.mod, column=pos %
-                         self.mod, sticky='nsew')
+                         self.mod, sticky='nsew', padx=1, pady=1)
             self.buttons.append(buttomI)
 
-    def hover(self, label, isEntering=False):
-        label.config(
+    def hover(self, button, isEntering=False):
+        button.widget.config(
             background="white" if isEntering else self.original_background)
 
     def down_menu(self):

@@ -33,7 +33,7 @@ class Img:
         self.path = img_path
         image = Image.open(img_path)
         width, height = image.size
-        maxSize = 120
+        maxSize = 150
         XSIZE = maxSize if width > height else maxSize*width//height
         YSIZE = maxSize if height > width else maxSize*height//width
         self.img = image.resize((XSIZE, YSIZE), Image.ANTIALIAS)

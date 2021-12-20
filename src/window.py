@@ -8,7 +8,7 @@
 from tkinter import Frame, ttk, filedialog
 import images as img
 from typing import List
-from tkinter.constants import BOTH, CENTER, HORIZONTAL
+from tkinter.constants import BOTH, CENTER
 import tkinter as tk
 import tags
 import scrollableframe as sf
@@ -16,6 +16,7 @@ import help_panel
 import read_write
 import tag_panel
 from ttkthemes import ThemedTk
+from sys import argv
 
 param = {'expand': 1, "fill": BOTH}
 
@@ -34,7 +35,7 @@ class right_panel:
 
     def initialise(self):
         self.tc = self.theme_class(self)
-        sb = self.select_option(self)
+        self.select_option(self)
         f1 = [read_write.write_file, read_write.read_file]
         save = ttk.Button(self.father, text='SaveToFile',
                           command=lambda: f1[0](self.list_img))
@@ -95,7 +96,8 @@ class right_panel:
             themes = [i.upper() for i in self.style.theme_names()]
             self.variable.set(themes[0])
             self.variable.trace("w", self.callback)
-            ttk.Label(self.rp.father, text= "Set theme:", anchor=CENTER).pack(fill=BOTH)
+            ttk.Label(self.rp.father, text="Set theme:",
+                      anchor=CENTER).pack(fill=BOTH)
             opt = ttk.OptionMenu(self.rp.father, self.variable, *themes)
             opt.pack(side='top', fill=BOTH, pady=(0, 15))
 
@@ -135,7 +137,6 @@ class left_panel:
             self.create_img(i, self.under_frame1, pos)
         for f, i in zip(self.tabs, self.titles):
             self.notebook.add(f, text=i)
-        self.notebook.select(self.notebook.tabs()[2])
 
     def updateSelected(self, _):
         if self.notebook.index(self.notebook.select()) == 1 or self.old_path != img.path_to_image:
@@ -188,12 +189,12 @@ class main_class:
         self.rp.initialise()
 
 
-def main(list_tag, list_img: List[img.Img]):
+def main(list_tag, list_img: List[img.Img], themedMode=True):
 
-    root = ThemedTk(theme='black')
+    root = ThemedTk(theme='black') if themedMode else tk.Tk()
     main_class(list_tag, list_img, root)
 
-    root.minsize(750, 480)
+    root.minsize(980, 500)
     root.mainloop()
 
 
@@ -204,5 +205,4 @@ if __name__ == '__main__':
 
     for j in img_list:
         j.set_tag_list(tag_list)
-    tag_list.add('Test')
-    main(tag_list, img_list)
+    main(tag_list, img_list, themedMode=(not ('-fast' in argv)))
