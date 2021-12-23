@@ -3,6 +3,12 @@ import tkinter as tk
 
 
 class create_scrollable_frame(ttk.Frame):
+    """
+        This class is created in order to have a scrollable frame.
+        So scrollbar will be disposed on the rigth and bottom to the window, this is
+        useful when the content of the window is large.
+    """
+
     def __init__(self, master) -> None:
         c1 = ttk.Frame(master)
         c2 = ttk.Frame(c1)

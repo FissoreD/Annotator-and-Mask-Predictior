@@ -3,6 +3,8 @@ from tkinter.constants import BOTH, LEFT
 from tkinter import Frame, ttk
 from tkhtmlview import HTMLLabel
 
+""" This file aims to manage the tag 'Help' """
+
 button_properties = {
     'relief': 'solid',
     'activebackground': '#F9FC77',
@@ -31,10 +33,12 @@ def right_empty_panel(parent):
 
 
 def clean_panel(panel):
+    """ To clean the panel, we loop over all the children of it, and destroy them """
     [i.destroy() for i in panel.winfo_children()]
 
 
 def right_panel(parent, file_path):
+    """ To display information, we clean the old panel, read the corresponding file wich contains help info and show it """
     clean_panel(parent)
     file = open(file_path, 'r')
     data = file.read()
@@ -43,6 +47,7 @@ def right_panel(parent, file_path):
 
 
 def create_button(panel_left, panel_right, pos):
+    """ Create a button with panel_left as parent and the rigth_panel method as effect """
     return tk.Button(panel_left,
                      **button_properties,
                      text=button_title[pos],
@@ -50,11 +55,15 @@ def create_button(panel_left, panel_right, pos):
 
 
 def main(parent):
+    """
+        panel_left contains the buttons stored in button_list
+        panel_rigth will display the corresponding information
+    """
     panel_left = ttk.PanedWindow(parent)
     panel_right = ttk.PanedWindow(parent)
-    buttom_list = [create_button(panel_left, panel_right, i) for i in range(4)]
-    for pos, buttom in enumerate(buttom_list):
-        buttom.grid(column=0, row=pos, pady=5)
+    button_list = [create_button(panel_left, panel_right, i) for i in range(4)]
+    for pos, button in enumerate(button_list):
+        button.grid(column=0, row=pos, pady=5)
 
     panel_left.pack(side="left")
     panel_right.pack(expand=1, fill=BOTH)

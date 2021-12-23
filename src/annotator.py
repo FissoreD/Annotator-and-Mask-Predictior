@@ -5,6 +5,7 @@ from PIL import Image
 from PIL import ImageTk
 from tkinter import messagebox
 
+""" Default tag's name before its real name attribution"""
 invalid_word = "&#undefined"
 
 
@@ -14,6 +15,9 @@ def window_parametrize(window):
 
 
 class annotator:
+
+    """ This class manages the windows which appears when we click on a selected image to make annotations """
+
     def __init__(self, frm, image):
         self.tag_list = image.tag_list
         self.frm = frm
@@ -41,6 +45,7 @@ class annotator:
         self.canvas.image = im
         self.canvas.pack()
 
+        """ For all images, we create the corresponding saved annotations """
         for tag_name in image.tag_of_rect:
             rects = image.tag_of_points[tag_name]
             for pos, rec in enumerate(rects):
@@ -60,6 +65,7 @@ class annotator:
         self.m = tk.Menu(self.window, tearoff=0)
 
     def popup(self, event, r):
+        """ Create and display the contextual menu at left-click mouse event on an annotation """
         try:
             self.m.delete("Delete")
             self.m.delete("Rename")
@@ -77,6 +83,7 @@ class annotator:
             self.m.grab_release()
 
     def deleteCurrent(self):
+        """ Delete the current drawn rectangle """
         try:
             self.canvas.delete(self.r[0])
             self.canvas.delete(self.r[1])
@@ -84,17 +91,25 @@ class annotator:
             pass
 
     def escape(self, event):
+        """ When we press 'Escape' key, we cancel the current annotation """
         if self.is_clicked:
             self.is_clicked = not self.is_clicked
             self.deleteCurrent()
 
     def draw_rect_on_motion(self, event):
+        """ To see the rectangle taking shape in real time """
         if self.is_clicked:
             self.deleteCurrent()
             x, y = event.x, event.y
             self.r = self.create_rec(x, y, *self.old_coords)
 
     def swap(self, event):
+        """
+            When the rectangle (the area corresponding to the annotation) is drawn,
+            we make sure that it is conform (not too small, not overriding an existing one, etc.)
+            If it isn't, we delete it before display an adverting message else we open the
+            window which manage the newly created annotation name's
+        """
         x, y = event.x, event.y
         self.is_clicked = not self.is_clicked
         if self.is_clicked:
@@ -127,6 +142,7 @@ class annotator:
                 self.set_tag_for_annotation()
 
     def delete_elt(self, r, errorMsg):
+        """ Delete a rectangle passed in parameter and display an error message"""
         self.canvas.delete(r[0])
         self.canvas.delete(r[1])
         self.image.delete_from_id(r)
@@ -134,6 +150,12 @@ class annotator:
             messagebox.showinfo("Warning", errorMsg)
 
     def create_rec(self, x, y, x1, y1):
+        """
+            Create a rectangle with 3 binds :
+                - rigth-click mouse : open the contextual menu
+                - the cursor is over the rectangle : we display it name on the left-bottom window's corner
+                - the cursor is outside it : we un-display name
+        """
         r = self.create_rectangle(
             x, y, x1, y1, width=2, fill='green', alpha=.5)
         self.canvas.tag_bind(r[0], '<Button-3>',
@@ -145,6 +167,11 @@ class annotator:
         return r
 
     def create_tooltip(self, _, r, isEntering):
+        """
+            Creation of the tooltip which appears on rectangle's overring
+            This is a canvas text unboxed in an canvas rectangle
+            isEntering : boolean which indicate us if the cursor is out or inside
+        """
         try:
             self.canvas.delete(self.idtooltip)
             self.canvas.delete(self.idtooltip2)
@@ -162,6 +189,10 @@ class annotator:
             self.canvas.update()
 
     def create_rectangle(self, x1, y1, x2, y2, **kwargs):
+        """
+            At the creation of a rectangle, this method is called to correctly set all the option, parameters
+            of it (colors, opacity, etc.). And we make sure to save it on the rectangles list
+        """
         if 'alpha' in kwargs:
             alpha = int(kwargs.pop('alpha') * 255)
             fill = kwargs.pop('fill')
@@ -173,6 +204,12 @@ class annotator:
         return img, self.canvas.create_rectangle(x1, y1, x2, y2, **kwargs)
 
     def set_tag_for_annotation(self, is_renaming=(False, 0)):
+        """
+            After creating the area, we ask to the user to name it.
+            The window is open.
+            If there are already tag names, a scrolling menu is proposed in which he can choose the wanted name
+            else, in all cases, we propose to user to create one on the fly
+        """
         window = tk.Toplevel(self.window)
         window.title("Set tag")
         window_parametrize(window)
@@ -187,16 +224,18 @@ class annotator:
             else:
                 self.tag_list.rename(invalid_word, x.capitalize())
 
+        """ Check if the user have existing tags, if so, we create the option menu """
         if len(L) != 0:
             x = L[0]
 
             variable = tk.StringVar(panel)
             variable.set(x)
 
-            opt = ttk.OptionMenu(panel, variable, *L)
+            opt = ttk.OptionMenu(panel, variable, L[0], *L)
             opt.pack(expand=1, fill=BOTH)
 
             def on_change():
+                """ We get chosen name and rename the current annotation"""
                 x = variable.get()
                 window.destroy()
                 window_parametrize(self.window)
@@ -204,9 +243,15 @@ class annotator:
             butt = ttk.Button(panel, text='Send', command=on_change)
             butt.pack(expand=1, fill=tk.BOTH)
             ttk.Separator(panel, orient='horizontal').pack(fill='x', pady=7)
+
+        """ Entry field """
         entry = ttk.Entry(panel)
 
         def create_tag():
+            """
+                If the entry is the empty string or the invalid_word, we display an warning message, else
+                we correctly rename the current annotation, add the tag in the tag list and close the window. 
+            """
             x = entry.get()
             if x == "" or x.capitalize() == invalid_word:
                 messagebox.showinfo("Error", "Invalid Tag name")
@@ -225,4 +270,5 @@ class annotator:
 
 
 def main(frm, frame):
+    """ Create an instance of the class annotator """
     annotator(frm, frame)

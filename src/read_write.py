@@ -5,14 +5,7 @@ import tags
 import json
 from tkinter import filedialog
 
-
-"""
-    file apri → open(nome file, modo lettura)
-    tue operazioni
-    devi sempre chiuderlo alla file .close()
-    
-
-"""
+""" This file is all about reading and writing files """
 
 
 def find_image(img_path, list_img: List[img.Img]):
@@ -22,6 +15,10 @@ def find_image(img_path, list_img: List[img.Img]):
 
 
 def read_file(list_img: List[img.Img]):
+    """
+        Opening of json file which store all the annotations.
+        We browse them all and we assign them respectively to each of the images
+    """
     file = filedialog.askopenfile(filetypes=[('JSON', '.json')])
     if file == None:
         return
@@ -39,6 +36,7 @@ def read_file(list_img: List[img.Img]):
 
 
 def write_file(list_img: List[img.Img]):
+    """ We browe all annotations and store it in a json file """
     file = filedialog.asksaveasfile(
         defaultextension='.json', filetypes=[('JSON', '.json')],
         initialfile='output.json')

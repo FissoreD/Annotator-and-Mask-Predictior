@@ -17,6 +17,7 @@ path_to_image: str = "../img"
 
 
 def is_valid_image(image: str):
+    """ Check if the path exists or not """
     try:
         return Img(f"{path_to_image}/{image}")
     except UnidentifiedImageError:
@@ -24,11 +25,23 @@ def is_valid_image(image: str):
 
 
 def open_files():
+    """ Return a list of images (according to the path name given in listdir argument"""
     imgs = map(is_valid_image, listdir(path_to_image))
     return [i for i in imgs if i != None]
 
 
 class Img:
+    """
+        This class represent an image
+        An image :
+            - can be selected for annotating or not
+            - contains a set of annotations and the set of tag names
+            - is automatically resized for standatization
+
+        It contains in majority utility methods
+
+    """
+
     def __init__(self, img_path: str) -> None:
         self.path = img_path
         image = Image.open(img_path)
@@ -46,6 +59,10 @@ class Img:
         self.tag_list = l
 
     def add_tag(self, tag, x1, y1, x2, y2, rect_id):
+        """
+            Before adding the tag in the list, we make sure that it is valid by checking its size
+            or if it is in conflict with another one (via several 'shapely' pre-built utility methods)
+        """
         x1, x2, y1, y2 = min(x1, x2), max(x1, x2), min(y1, y2), max(y1, y2)
         coords = [[x1, y1], [x2, y2]]
         box_from_coord = box(x1, y1, x2, y2)
@@ -127,12 +144,14 @@ class Img:
         return imgLabel
 
     def createMiniLabel(self, frm):
+        """ In 'All images' tab, if we click on an image, we select it and make it highlighted """
         imgLabel = Img.create_image(frm, self.img)
         self.imgLabel = imgLabel
         imgLabel.bind("<Button>", self.mouseClick)
         return imgLabel
 
     def createMiniLabel2(self, frm):
+        """ In 'Selected images' tab, if we rigth-click on an image, the annotator class's window appears """
         imgLabel = Img.create_image(frm, self.img)
         imgLabel.bind("<Button-1>", lambda _: annotator.main(frm, self))
         return imgLabel

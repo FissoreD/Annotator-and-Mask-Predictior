@@ -1,6 +1,6 @@
 
 """
-    This file aims to create the guy for the ImageAnnotator
+    This file aims to create the GUI for the ImageAnnotator
     It only contains the structure and :
         ask for images to image_reader library
 """
@@ -26,6 +26,12 @@ def get_selected_images(list_images: List[img.Img]):
 
 
 class right_panel:
+    """
+    This class is a panel wich will always display.
+    It's in this panel where we can set the theme, check or uncheck all images or open the images' folder 
+
+    """
+
     def __init__(self, root, father, list_image, list_tag, left_panel) -> None:
         self.root = root
         self.father = father
@@ -34,6 +40,10 @@ class right_panel:
         self.lp = left_panel
 
     def initialise(self):
+        """
+            Creation of Save/Load File button
+            'SaveToFile' (resp. 'LoadFile') command is a reference of write_file (resp. read_file) method (cf read_write.py)
+        """
         self.tc = self.theme_class(self)
         self.select_option(self)
         f1 = [read_write.write_file, read_write.read_file]
@@ -65,6 +75,7 @@ class right_panel:
             return
 
         def create_buttons(self):
+            """ Creation of practical button like the possibility of check/uncheck all images or change the folder of images """
             self.lab = ttk.Label(
                 self.main, text='Check/Uncheck box', anchor=CENTER)
             bp = ttk.PanedWindow(self.main)
@@ -81,16 +92,23 @@ class right_panel:
             bp.pack()
 
         def listener(self, select_all):
+            """ Browse all images and set it to True/False (according to 'select_all' boolean) """
             for i in self.rp.list_img:
                 i.select(select_all)
             self.lp.updateSelected(None)
 
     class theme_class:
+        """ This class manages theme settings """
+
         def __init__(self, rp) -> None:
             self.rp = rp
             self.create_theme_option_panel()
 
         def create_theme_option_panel(self):
+            """
+                Creation of the scrolling menu in which several pre-built themes are proposed
+                Default theme : ALT
+            """
             self.variable = tk.StringVar(self.rp.father)
             self.style = ttk.Style(self.rp.root)
             themes = [i.upper() for i in self.style.theme_names()]
@@ -98,7 +116,8 @@ class right_panel:
             self.variable.trace("w", self.callback)
             ttk.Label(self.rp.father, text="Set theme:",
                       anchor=CENTER).pack(fill=BOTH)
-            opt = ttk.OptionMenu(self.rp.father, self.variable, *themes)
+            opt = ttk.OptionMenu(
+                self.rp.father, self.variable, themes[0], *themes)
             opt.pack(side='top', fill=BOTH, pady=(0, 15))
 
         def callback(self, *args):
@@ -106,6 +125,11 @@ class right_panel:
 
 
 class left_panel:
+    """
+        This class presents 4 tabs ('All images', 'Selected images', 'Tags', 'Help') in which we can browse.
+        This tabs are frames. The first 2 are scrollable.
+    """
+
     def __init__(self, father, images: List[img.Img], tags) -> None:
         self.mod = 4
         self.father = father
@@ -131,6 +155,7 @@ class left_panel:
         f1.grid(columnspan=self.mod)
 
     def initialise(self):
+        """ We create the 4 tabs and all images object in 'All images' frame"""
         [f.pack() for f in self.tabs]
         self.notebook.bind("<<NotebookTabChanged>>", self.updateSelected)
         for pos, i in enumerate(self.images):
@@ -139,6 +164,11 @@ class left_panel:
             self.notebook.add(f, text=i)
 
     def updateSelected(self, _):
+        """
+            According to the selected tab, we update the images displayed (delete then recreate):
+                - if we swap to the first or second tab  and if the images' path have changed
+                - if we swap to the second tab ('Selected images') (systematically)
+        """
         if self.notebook.index(self.notebook.select()) == 1 or self.old_path != img.path_to_image:
             for widget in self.under_frame2.winfo_children():
                 widget.grid_forget() if isinstance(widget, tk.Label) else None
@@ -153,6 +183,10 @@ class left_panel:
             self.old_path = img.path_to_image
 
     def create_img(self, i,  frm: Frame, pos):
+        """
+            If we are in 'All images' frame (under_frame1) (resp. 'Selected images' (under_frame2))
+            then we create a image object with corresponding bind (cf. images.py)
+        """
         img = i.createMiniLabel2(
             self.under_frame2) if frm == self.under_frame2 else i.createMiniLabel(self.under_frame1)
         img.grid(row=pos // self.mod, column=pos %
@@ -160,6 +194,8 @@ class left_panel:
 
 
 class main_class:
+    """ The main class wich manages both left and rigth panels (creation and initialization) """
+
     def __init__(self, list_tag, list_img: List[img.Img], root) -> None:
         self.list_tag = list_tag
         self.list_img = list_img

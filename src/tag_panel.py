@@ -1,4 +1,3 @@
-import builtins
 import tkinter as tk
 from tkinter import ttk
 from typing import List
@@ -7,6 +6,8 @@ from scrollableframe import create_scrollable_frame
 
 
 class tag_panel(ttk.Frame):
+    """This class corresponds to the 'Tags' tab """
+
     def __init__(self, master, tag_list: Tag) -> None:
         super().__init__(master)
         self.mod = 3
@@ -29,6 +30,7 @@ class tag_panel(ttk.Frame):
         self.original_background = ttk.Label().cget("background")
 
     def popup(self, event):
+        """ When we rigth-click on a tag, we can delete or rename it """
         try:
             self.m.delete("Delete")
             self.m.delete("Rename")
@@ -47,11 +49,13 @@ class tag_panel(ttk.Frame):
             self.m.grab_release()
 
     def remove_button(self, e):
+        """ Method to remove a tag (it remove it also from tag_list) """
         self.buttons.remove(e.widget)
         self.tag_list.remove(e.widget['text'])
         e.widget.grid_forget()
 
     def all_tags(self):
+        """ For all tags, we create the respective label with its corresponding binds """
 
         [i.grid_forget() for i in self.buttons]
         self.buttons = []
@@ -66,15 +70,18 @@ class tag_panel(ttk.Frame):
             self.buttons.append(buttomI)
 
     def hover(self, button, isEntering=False):
+        """ At tag's overflight, highlighting of it """
         button.widget.config(
             background="white" if isEntering else self.original_background)
 
     def down_menu(self):
+        """ Creation of the button wich allows us create new tag """
         add_tag = ttk.Button(self.bottom_pane, text='Add tag',
                              command=self.add_tag_listener)
         add_tag.pack(expand=1, fill=tk.BOTH)
 
     def add_tag_listener(self, isRenaming=None):
+        """ Opening of a window wich allows us to enter a name and valid it by pressing 'Enter' key """
         def on_change(e):
             [i.grid_forget() for i in self.buttons]
             self.new_tag = e.widget.get()
