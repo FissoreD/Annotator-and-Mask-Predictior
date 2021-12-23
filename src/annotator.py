@@ -5,7 +5,7 @@ from PIL import Image
 from PIL import ImageTk
 from tkinter import messagebox
 
-""" Default tag's name before its real name attribution"""
+""" Default tag's name before its real attributed name """
 invalid_word = "&#undefined"
 
 
@@ -142,7 +142,7 @@ class annotator:
                 self.set_tag_for_annotation()
 
     def delete_elt(self, r, errorMsg):
-        """ Delete a rectangle passed in parameter and display an error message"""
+        """ Delete a rectangle passed in parameter and display an error message """
         self.canvas.delete(r[0])
         self.canvas.delete(r[1])
         self.image.delete_from_id(r)

@@ -155,7 +155,7 @@ class left_panel:
         f1.grid(columnspan=self.mod)
 
     def initialise(self):
-        """ We create the 4 tabs and all images object in 'All images' frame"""
+        """ We create the 4 tabs and all images object in 'All images' frame """
         [f.pack() for f in self.tabs]
         self.notebook.bind("<<NotebookTabChanged>>", self.updateSelected)
         for pos, i in enumerate(self.images):
