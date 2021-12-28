@@ -3,6 +3,8 @@ from typing import List
 import images as img
 import tags
 import json
+import os
+import shutil
 from tkinter import filedialog
 
 """ This file is all about reading and writing files """
@@ -30,13 +32,12 @@ def read_file(list_img: List[img.Img]):
         img = find_image(elt[0], list_img)
         for tag_name in elt[1]:
             for coor in elt[1][tag_name]:
-                img.add_tag(tag_name, coor[0][0],
-                            coor[0][1], coor[1][0], coor[1][1], None)
+                img.add_tag(tag_name, *coor, None)
     file.close()
 
 
 def write_file(list_img: List[img.Img]):
-    """ We browe all annotations and store it in a json file """
+    """ We browse all annotations and store them in a json file """
     file = filedialog.asksaveasfile(
         defaultextension='.json', filetypes=[('JSON', '.json')],
         initialfile='output.json')
@@ -47,6 +48,22 @@ def write_file(list_img: List[img.Img]):
         L.append([elt.path, elt.tag_of_points])
     json.dump(L, file)
     file.close()
+
+
+def create_all_cropped_images(image_list: List[img.Img]):
+    folder = "crop_img"
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
+    for i in image_list:
+        if i.is_selected:
+            i.crop_image()
 
 
 if __name__ == '__main__':

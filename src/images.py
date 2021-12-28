@@ -1,7 +1,7 @@
 """
     This file is aims to:
         - open images from img folder
-        - list the options of objects linked to the image, and create 
+        - list the options of objects linked to the image, and create
           an association
 """
 from typing import List
@@ -14,13 +14,14 @@ import annotator
 import itertools
 from shapely.geometry import box
 path_to_image: str = "../img"
+path_to_cropped_img: str = "./crop_img"
 
 
 def is_valid_image(image: str):
     """ Check if the path exists or not """
     try:
         return Img(f"{path_to_image}/{image}")
-    except UnidentifiedImageError:
+    except (UnidentifiedImageError, PermissionError):
         return None
 
 
@@ -44,12 +45,23 @@ class Img:
 
     def __init__(self, img_path: str) -> None:
         self.path = img_path
+        """ The image of labels in selected images panel """
         image = Image.open(img_path)
         width, height = image.size
         maxSize = 150
         XSIZE = maxSize if width > height else maxSize*width//height
         YSIZE = maxSize if height > width else maxSize*height//width
         self.img = image.resize((XSIZE, YSIZE), Image.ANTIALIAS)
+
+        """ The image of annotator """
+        big_image: Image = Image.open(img_path)
+        maxSize = 500
+        XSIZE = maxSize if big_image.width > big_image.height else maxSize * \
+            big_image.width//big_image.height
+        YSIZE = maxSize if big_image.height > big_image.width else maxSize * \
+            big_image.height//big_image.width
+        self.big_image = big_image.resize((XSIZE, YSIZE), Image.ANTIALIAS)
+
         self.tag_of_points: dict = dict()
         self.tag_of_rect: dict = dict()
         self.tag_list: set = set()
@@ -63,8 +75,9 @@ class Img:
             Before adding the tag in the list, we make sure that it is valid by checking its size
             or if it is in conflict with another one (via several 'shapely' pre-built utility methods)
         """
+
         x1, x2, y1, y2 = min(x1, x2), max(x1, x2), min(y1, y2), max(y1, y2)
-        coords = [[x1, y1], [x2, y2]]
+        coords = [x1, y1, x2, y2]
         box_from_coord = box(x1, y1, x2, y2)
         if abs(x1-x2) <= 5 or abs(y1-y2) <= 5 or box_from_coord.area <= 40:
             return False
@@ -118,7 +131,7 @@ class Img:
         self.tag_of_rect[old_tag].pop(pos)
         coords = self.tag_of_points[old_tag].pop(pos)
         self.remove_if_empty(old_tag)
-        self.add_tag(new_tag_name, *coords[0], *coords[1], rect_id)
+        self.add_tag(new_tag_name, *coords, rect_id)
 
     def update_tag(self, old_value, new_value):
         if old_value in self.tag_of_points:
@@ -166,6 +179,17 @@ class Img:
         ]
         self.is_selected = not self.is_selected
         self.imgLabel.config(opts[self.is_selected])
+
+    def crop_image(self):
+        """ For every tag of the image we create a sub-image and save it in 'crop_img' folder """
+        for tag, coordsList in self.tag_of_points.items():
+            for coords in coordsList:
+                x1, y1, x2, y2 = coords
+                cropped: Image = self.big_image.crop(
+                    coords)
+                cropped.thumbnail((180, 180), Image.ANTIALIAS)
+                cropped.save(
+                    f"{path_to_cropped_img}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{x2-x2}-{y2-y1}-{tag}.png")
 
 
 if __name__ == '__main__':

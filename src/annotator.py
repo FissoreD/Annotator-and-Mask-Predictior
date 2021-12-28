@@ -33,14 +33,10 @@ class annotator:
         mainPanel = ttk.PanedWindow(self.window)
         mainPanel.grid(row=0, column=0)
 
-        im1 = Image.open(image.path)
-        maxSize = 500
-        XSIZE = maxSize if im1.width > im1.height else maxSize * im1.width//im1.height
-        YSIZE = maxSize if im1.height > im1.width else maxSize * im1.height//im1.width
-
-        im1 = im1.resize((XSIZE, YSIZE), Image.ANTIALIAS)
+        im1: Image = image.big_image
         im = ImageTk.PhotoImage(im1)
-        self.canvas = tk.Canvas(mainPanel, height=YSIZE, width=XSIZE)
+        self.canvas = tk.Canvas(mainPanel,
+                                height=im1.size[1], width=im1.size[0])
         self.canvas.create_image(im.width()/2, im.height()/2, image=im)
         self.canvas.image = im
         self.canvas.pack()
@@ -49,8 +45,7 @@ class annotator:
         for tag_name in image.tag_of_rect:
             rects = image.tag_of_points[tag_name]
             for pos, rec in enumerate(rects):
-                x, y, x1, y1 = rec[0][0], rec[0][1], rec[1][0], rec[1][1]
-                rec_id = self.create_rec(x, y, x1, y1)
+                rec_id = self.create_rec(*rec)
                 image.tag_of_rect[tag_name][pos][1] = rec_id
 
         mainPanel.pack(fill=tk.BOTH, expand=1)
