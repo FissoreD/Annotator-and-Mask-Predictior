@@ -4,6 +4,7 @@
         - list the options of objects linked to the image, and create
           an association
 """
+import os
 from typing import List
 from os import listdir
 from PIL import Image, UnidentifiedImageError
@@ -183,13 +184,16 @@ class Img:
     def crop_image(self):
         """ For every tag of the image we create a sub-image and save it in 'crop_img' folder """
         for tag, coordsList in self.tag_of_points.items():
+            folder_path = f"{path_to_cropped_img}/{tag}"
+            if not os.path.exists(folder_path):
+                os.mkdir(folder_path)
             for coords in coordsList:
                 x1, y1, x2, y2 = coords
                 cropped: Image = self.big_image.crop(
                     coords)
                 cropped.thumbnail((180, 180), Image.ANTIALIAS)
                 cropped.save(
-                    f"{path_to_cropped_img}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{x2-x2}-{y2-y1}-{tag}.png")
+                    f"{folder_path}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{x2-x2}-{y2-y1}-{tag}.png")
 
 
 if __name__ == '__main__':
