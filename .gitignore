@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 src/output.json
 test.py
+crop_img

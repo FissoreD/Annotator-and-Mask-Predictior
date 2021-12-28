@@ -52,6 +52,8 @@ def write_file(list_img: List[img.Img]):
 
 def create_all_cropped_images(image_list: List[img.Img]):
     folder = "crop_img"
+    if not os.path.exists(folder):
+        os.mkdir(folder)
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
         try:
