@@ -14,6 +14,8 @@ import tkinter as tk
 import annotator
 import itertools
 from shapely.geometry import box
+import nnl_process
+
 path_to_image: str = "../img"
 path_to_cropped_img: str = "./crop_img"
 
@@ -192,8 +194,9 @@ class Img:
                 cropped: Image = self.big_image.crop(
                     coords)
                 cropped.thumbnail((180, 180), Image.ANTIALIAS)
-                cropped.save(
-                    f"{folder_path}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{x2-x2}-{y2-y1}-{tag}.png")
+                file_name = f"{folder_path}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{x2-x1}-{y2-y1}.jpg"
+                cropped.convert('RGB').save(file_name, 'JPEG')
+                nnl_process.remove_not_valid_images(file_name)
 
 
 if __name__ == '__main__':

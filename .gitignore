@@ -130,3 +130,5 @@ dmypy.json
 src/output.json
 test.py
 crop_img
+keras_pred_folder
+annotation
