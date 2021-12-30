@@ -5,7 +5,8 @@
         ask for images to image_reader library
 """
 
-from tkinter import Frame, ttk, filedialog
+from tkinter import Button, Frame, ttk, filedialog
+import cropped_panel
 import images as img
 from typing import List
 from tkinter.constants import BOTH, CENTER
@@ -23,6 +24,12 @@ param = {'expand': 1, "fill": BOTH}
 
 def get_selected_images(list_images: List[img.Img]):
     return [i for i in list_images if i.is_selected]
+
+
+def create_frame(mod, parent):
+    f1 = ttk.Frame(parent)
+    parent.canvas.bind('<Configure>', lambda e: f1.config(width=e.width))
+    f1.grid(columnspan=mod)
 
 
 class right_panel:
@@ -138,35 +145,32 @@ class left_panel:
     def __init__(self, father, images: List[img.Img], tags) -> None:
         self.mod = 4
         self.father = father
-        self.images = images
+        self.img_list = images
         self.old_path = img.path_to_image
         self.notebook = ttk.Notebook(father)
         self.notebook.pack(fill=tk.BOTH, expand=1)
-        self.titles = ["All images", "Selected images", "Tags", "Help"]
+        self.titles = ["All images", "Cropped images", "Tags", "Help"]
         self.tabs = [ttk.Frame(self.notebook) for i in range(len(self.titles))]
 
         self.under_frame1 = sf.create_scrollable_frame(self.tabs[0])
-        self.under_frame2 = sf.create_scrollable_frame(self.tabs[1])
+        self.under_frame2 = self.tabs[1]
+        self.list_of_cropped_images: List[img.Img] = []
 
-        self.create_frame(self.under_frame1)
-        self.create_frame(self.under_frame2)
+        create_frame(self.mod, self.under_frame1)
+        # self.create_frame(self.under_frame2)
 
-        tags.tag_panel = tag_panel.tag_panel(self.tabs[2], tags)
-        help_panel.main(self.tabs[3])
-
-    def create_frame(self, parent):
-        f1 = ttk.Frame(parent)
-        parent.canvas.bind('<Configure>', lambda e: f1.config(width=e.width))
-        f1.grid(columnspan=self.mod)
+        tags.tag_panel = tag_panel.tag_panel(self.tabs[-2], tags)
+        help_panel.main(self.tabs[-1])
 
     def initialise(self):
         """ We create the 4 tabs and all images object in 'All images' frame """
         [f.pack() for f in self.tabs]
-        self.notebook.bind("<<NotebookTabChanged>>", self.updateSelected)
-        for pos, i in enumerate(self.images):
+        # self.notebook.bind("<<NotebookTabChanged>>", self.updateSelected)
+        for pos, i in enumerate(self.img_list):
             self.create_img(i, self.under_frame1, pos)
         for f, i in zip(self.tabs, self.titles):
             self.notebook.add(f, text=i)
+        cropped_panel.Cropped_Panel(self.under_frame2, self.img_list)
 
     def updateSelected(self, _):
         """
@@ -177,13 +181,13 @@ class left_panel:
         if self.notebook.index(self.notebook.select()) == 1 or self.old_path != img.path_to_image:
             for widget in self.under_frame2.winfo_children():
                 widget.grid_forget() if isinstance(widget, tk.Label) else None
-            image = [image for image in self.images if image.is_selected]
+            image = [image for image in self.img_list if image.is_selected]
             for pos, i in enumerate(image):
                 self.create_img(i, self.under_frame2, pos)
         if self.notebook.index(self.notebook.select()) == 0 and self.old_path != img.path_to_image:
             for widget in self.under_frame1.winfo_children():
                 widget.grid_forget() if isinstance(widget, tk.Label) else None
-            for pos, i in enumerate(self.images):
+            for pos, i in enumerate(self.img_list):
                 self.create_img(i, self.under_frame1, pos)
             self.old_path = img.path_to_image
 
@@ -192,8 +196,7 @@ class left_panel:
             If we are in 'All images' frame (under_frame1) (resp. 'Selected images' (under_frame2))
             then we create a image object with corresponding bind (cf. images.py)
         """
-        img = i.createMiniLabel2(
-            self.under_frame2) if frm == self.under_frame2 else i.createMiniLabel(self.under_frame1)
+        img = i.createMiniLabel2(self.under_frame1)
         img.grid(row=pos // self.mod, column=pos %
                  self.mod, ipadx=5, ipady=5, sticky='nswe')
 

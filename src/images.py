@@ -28,6 +28,13 @@ def is_valid_image(image: str):
         return None
 
 
+def create_image(parent, img):
+    photo = ImageTk.PhotoImage(img)
+    imgLabel = tk.Label(parent, image=photo, anchor=tk.CENTER)
+    imgLabel.image = photo
+    return imgLabel
+
+
 def open_files():
     """ Return a list of images (according to the path name given in listdir argument"""
     imgs = map(is_valid_image, listdir(path_to_image))
@@ -153,23 +160,18 @@ class Img:
     def __repr__(self):
         return self.__str__()
 
-    def create_image(parent, img):
-        photo = ImageTk.PhotoImage(img)
-        imgLabel = tk.Label(parent, image=photo, anchor=tk.CENTER)
-        imgLabel.image = photo
-        return imgLabel
-
     def createMiniLabel(self, frm):
         """ In 'All images' tab, if we click on an image, we select it and make it highlighted """
-        imgLabel = Img.create_image(frm, self.img)
+        imgLabel = create_image(frm, self.img)
         self.imgLabel = imgLabel
         imgLabel.bind("<Button>", self.mouseClick)
         return imgLabel
 
     def createMiniLabel2(self, frm):
         """ In 'Selected images' tab, if we rigth-click on an image, the annotator class's window appears """
-        imgLabel = Img.create_image(frm, self.img)
+        imgLabel = create_image(frm, self.img)
         imgLabel.bind("<Button-1>", lambda _: annotator.main(frm, self))
+        imgLabel.config(relief="sunken")
         return imgLabel
 
     def select(self, b):
@@ -183,7 +185,7 @@ class Img:
         self.is_selected = not self.is_selected
         self.imgLabel.config(opts[self.is_selected])
 
-    def crop_image(self):
+    def crop_image(self, list=None):
         """ For every tag of the image we create a sub-image and save it in 'crop_img' folder """
         for tag, coordsList in self.tag_of_points.items():
             folder_path = f"{path_to_cropped_img}/{tag}"
@@ -191,11 +193,12 @@ class Img:
                 os.mkdir(folder_path)
             for coords in coordsList:
                 x1, y1, x2, y2 = coords
-                cropped: Image = self.big_image.crop(
-                    coords)
+                cropped: Image = self.big_image.crop(coords)
                 file_name = f"{folder_path}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{x2-x1}-{y2-y1}.jpg"
                 cropped.thumbnail((180, 180), Image.ANTIALIAS)
                 cropped.convert('RGB').save(file_name, 'JPEG')
+                if list != None:
+                    list.append((cropped, tag))
                 nnl_process.remove_not_valid_images(file_name)
 
 
