@@ -193,8 +193,8 @@ class Img:
                 x1, y1, x2, y2 = coords
                 cropped: Image = self.big_image.crop(
                     coords)
-                cropped.thumbnail((180, 180), Image.ANTIALIAS)
                 file_name = f"{folder_path}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{x2-x1}-{y2-y1}.jpg"
+                cropped.thumbnail((180, 180), Image.ANTIALIAS)
                 cropped.convert('RGB').save(file_name, 'JPEG')
                 nnl_process.remove_not_valid_images(file_name)
 

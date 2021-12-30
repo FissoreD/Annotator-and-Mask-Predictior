@@ -1,20 +1,25 @@
-import io
 import os
-from tkinter import Scrollbar
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 import read_write
-import matplotlib.pyplot as plt
 import images
 import tags
+import numpy as np
 """
 A lot of code of this file is inspired from the following internet page : 
 https://keras.io/examples/vision/image_classification_from_scratch/
 """
 
 image_size = (180, 180)
+crop_dir = 'crop_img'
+epochs = 10
 KERA_PRED_FOLDER = 'keras_pred_folder'
+MODEL_PATH = f"{KERA_PRED_FOLDER}/model"
+
+
+def get_class_names():
+    return os.listdir(crop_dir)
 
 
 def remove_not_valid_images(path):
@@ -31,12 +36,12 @@ def remove_not_valid_images(path):
         os.remove(path)
 
 
-def create_standardize_data_set(path):
+def create_data_set(path):
     """
-    Create training and validation standardize model from a path
+    Create training and validation standardize model from path
     """
     def func(kwargs):
-        return tf.keras.preprocessing.image_dataset_from_directory(path, **kwargs).prefetch(buffer_size=32)
+        return tf.keras.preprocessing.image_dataset_from_directory(path, **kwargs)
     dico = {
         "validation_split": 0.2,
         "seed": 1337,
@@ -48,95 +53,83 @@ def create_standardize_data_set(path):
     return train_ds, val_ds
 
 
-def make_model(input_shape, num_classes):
-    inputs = keras.Input(shape=input_shape)
-    # Image augmentation block
-    data_augmentation = keras.Sequential(
-        [layers.RandomFlip("horizontal"), layers.RandomRotation(0.1), ]
-    )
-    x = data_augmentation(inputs)
-
-    # Entry block
-    x = layers.Rescaling(1.0 / 255)(x)
-    x = layers.Conv2D(32, 3, strides=2, padding="same")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-
-    x = layers.Conv2D(64, 3, padding="same")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-
-    previous_block_activation = x  # Set aside residual
-
-    for size in [128, 256, 512, 728]:
-        x = layers.Activation("relu")(x)
-        x = layers.SeparableConv2D(size, 3, padding="same")(x)
-        x = layers.BatchNormalization()(x)
-
-        x = layers.Activation("relu")(x)
-        x = layers.SeparableConv2D(size, 3, padding="same")(x)
-        x = layers.BatchNormalization()(x)
-
-        x = layers.MaxPooling2D(3, strides=2, padding="same")(x)
-
-        # Project residual
-        residual = layers.Conv2D(size, 1, strides=2, padding="same")(
-            previous_block_activation
-        )
-        x = layers.add([x, residual])  # Add back residual
-        previous_block_activation = x  # Set aside next residual
-
-    x = layers.SeparableConv2D(1024, 3, padding="same")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-
-    x = layers.GlobalAveragePooling2D()(x)
-    if num_classes == 2:
-        activation = "sigmoid"
-        units = 1
-    else:
-        activation = "softmax"
-        units = num_classes
-
-    x = layers.Dropout(0.5)(x)
-    outputs = layers.Dense(units, activation=activation)(x)
-    return keras.Model(inputs, outputs)
+def configure_for_performance(train_ds, val_ds):
+    AUTOTUNE = tf.data.AUTOTUNE
+    train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
+    val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
+    return train_ds, val_ds
 
 
-def train_model(model, train_ds, val_ds):
-    epochs = 50
-    if not os.path.exists(KERA_PRED_FOLDER):
-        os.mkdir(KERA_PRED_FOLDER)
-    callbacks = [
-        keras.callbacks.ModelCheckpoint("{folder}/save_at_{epoch}.h5"),
-    ]
-    model.compile(
-        optimizer=keras.optimizers.Adam(1e-3),
-        loss="binary_crossentropy",
-        metrics=["accuracy"],
-    )
+def normalize_train_ds(train_ds):
+    normalization_layer = layers.Rescaling(1./255)
+    return train_ds.map(lambda x, y: (normalization_layer(x), y))
+
+
+def make_model():
+    class_names = get_class_names()
+    try:
+        model = keras.models.load_model(MODEL_PATH)
+    except Exception:
+        num_classes = len(class_names)
+        model = keras.models.Sequential([
+            layers.Rescaling(1./255, input_shape=image_size + (3,)),
+            layers.Conv2D(16, 3, padding='same', activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Conv2D(32, 3, padding='same', activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Conv2D(64, 3, padding='same', activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Flatten(),
+            layers.Dense(128, activation='relu'),
+            layers.Dense(num_classes)
+        ])
+        f = tf.keras.losses.SparseCategoricalCrossentropy
+        model.compile(optimizer='adam',
+                      loss=f(from_logits=True),
+                      metrics=['accuracy'])
+    return model
+
+
+def train_model(train_ds, val_ds):
     model.fit(
-        train_ds, epochs=epochs, callbacks=callbacks, validation_data=val_ds,
+        train_ds,
+        validation_data=val_ds,
+        epochs=epochs
     )
+    model.save(MODEL_PATH)
 
 
-def evaluate_image(model, img_path):
-    img = keras.preprocessing.image.load_img(
-        img_path,
-        target_size=image_size
-    )
-
-    img_array = keras.preprocessing.image.img_to_array(img)
-    img_array = tf.expand_dims(img_array, 0)  # Create batch axis
-
+def evaluate_image(model, img_path, toPrint=False):
+    class_names = get_class_names()
+    img = tf.keras.utils.load_img(img_path, target_size=image_size)
+    img_array = tf.keras.utils.img_to_array(img)
+    img_array = tf.expand_dims(img_array, 0)
     predictions = model.predict(img_array)
-    score = predictions[0]
-    return score
+    score = tf.nn.softmax(predictions[0])
+    its_class = class_names[np.argmax(score)]
+    its_score = 100 * np.max(score)
+    if toPrint:
+        print(
+            "This image most likely belongs to {} with a {:.2f} percent confidence."
+            .format(its_class, its_score)
+        )
+    return its_class, its_score
+
+
+def draw_a_plot_of_data(train_ds):
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(10, 10))
+    for images, labels in train_ds.take(1):
+        for i in range(9):
+            ax = plt.subplot(3, 3, i + 1)
+            plt.imshow(images[i].numpy().astype("uint8"))
+            plt.title(train_ds.class_names[labels[i]])
+            plt.axis("off")
 
 
 if __name__ == "__main__":
-    create_model = False
-    if create_model:
+    is_create_model = False
+    if is_create_model:
         """ 
         Creation of images with annotation from file 
         for testing phase
@@ -153,18 +146,33 @@ if __name__ == "__main__":
         """
         Creation of training and validation set
         """
-        train_ds, val_ds = create_standardize_data_set('crop_img')
+        train_ds, val_ds = create_data_set(crop_dir)
+        # draw_a_plot_of_data(train_ds)
 
-        model = make_model(input_shape=image_size + (3,), num_classes=2)
+        """
+        Configure the dataset for performance
+        """
+        train_ds, val_ds = configure_for_performance(train_ds, val_ds)
 
-        train_model(model, train_ds, val_ds)
+        normalized_ds = normalize_train_ds(train_ds)
+
+        model = make_model()
+        train_model(train_ds, val_ds)
+
+        # model = make_model(image_size + (3,), 2)
+
+        # train_model(model, train_ds, val_ds)
     else:
-        model = keras.models.load_model(KERA_PRED_FOLDER + '/save_at_50.h5')
+        model = keras.models.load_model(
+            f"{KERA_PRED_FOLDER}/model")
+
+    image_path = 'crop_img/No/image_000-bb-15x0-307-431.jpg'
+    evaluate_image(model, image_path)
+
     """
-    Here we test an image with our model
+    Here we test all images wrt our model
     """
-    score = evaluate_image(model, "crop_img/Mask/image5-bb-157x24-43-42.jpg")
-    print(
-        "This image is %.2f percent cat and %.2f percent dog."
-        % (100 * (1 - score), 100 * score)
-    )
+    for under_dir in os.listdir(crop_dir):
+        for file_name in os.listdir(crop_dir+"/"+under_dir):
+            path = f"{crop_dir}/{under_dir}/{file_name}"
+            print(f"{under_dir} {file_name} {evaluate_image(model,path)}")

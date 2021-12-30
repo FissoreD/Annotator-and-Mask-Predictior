@@ -132,3 +132,4 @@ test.py
 crop_img
 keras_pred_folder
 annotation
+.vscode
