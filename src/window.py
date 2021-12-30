@@ -54,15 +54,11 @@ class right_panel:
         self.tc = self.theme_class(self)
         self.select_option(self)
         f1 = [read_write.write_file,
-              read_write.read_file,
-              read_write.create_all_cropped_images]
+              read_write.read_file]
         save = ttk.Button(self.father, text='SaveToFile',
                           command=lambda: f1[0](self.list_img))
         load = ttk.Button(self.father, text='LoadFile',
                           command=lambda: f1[1](self.list_img))
-        predict = ttk.Button(self.father, text='LaunchPrediction',
-                             command=lambda: f1[2](self.list_img))
-        predict.pack(param)
         load.pack(param)
         save.pack(param)
 

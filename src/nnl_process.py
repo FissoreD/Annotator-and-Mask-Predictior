@@ -67,30 +67,27 @@ def normalize_train_ds(train_ds):
 
 def make_model():
     class_names = get_class_names()
-    try:
-        model = keras.models.load_model(MODEL_PATH)
-    except Exception:
-        num_classes = len(class_names)
-        model = keras.models.Sequential([
-            layers.Rescaling(1./255, input_shape=image_size + (3,)),
-            layers.Conv2D(16, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Conv2D(32, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Conv2D(64, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Flatten(),
-            layers.Dense(128, activation='relu'),
-            layers.Dense(num_classes)
-        ])
-        f = tf.keras.losses.SparseCategoricalCrossentropy
-        model.compile(optimizer='adam',
-                      loss=f(from_logits=True),
-                      metrics=['accuracy'])
+    num_classes = len(class_names)
+    model = keras.models.Sequential([
+        layers.Rescaling(1./255, input_shape=image_size + (3,)),
+        layers.Conv2D(16, 3, padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Conv2D(32, 3, padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Conv2D(64, 3, padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Flatten(),
+        layers.Dense(128, activation='relu'),
+        layers.Dense(num_classes)
+    ])
+    f = tf.keras.losses.SparseCategoricalCrossentropy
+    model.compile(optimizer='adam',
+                  loss=f(from_logits=True),
+                  metrics=['accuracy'])
     return model
 
 
-def train_model(train_ds, val_ds):
+def train_model(train_ds, val_ds, model):
     model.fit(
         train_ds,
         validation_data=val_ds,
@@ -127,6 +124,20 @@ def draw_a_plot_of_data(train_ds):
             plt.axis("off")
 
 
+def make_all():
+
+    # Creation of training and validation set
+    train_ds, val_ds = create_data_set(crop_dir)
+
+    # Configure the dataset for performance
+    train_ds, val_ds = configure_for_performance(train_ds, val_ds)
+
+    normalized_ds = normalize_train_ds(train_ds)
+    model = make_model()
+
+    train_model(normalized_ds, val_ds, model)
+
+
 if __name__ == "__main__":
     is_create_model = False
     if is_create_model:
@@ -143,25 +154,7 @@ if __name__ == "__main__":
         read_write.read_file(img_list, file_path="annotation/test.json")
         read_write.create_all_cropped_images(img_list)
 
-        """
-        Creation of training and validation set
-        """
-        train_ds, val_ds = create_data_set(crop_dir)
-        # draw_a_plot_of_data(train_ds)
-
-        """
-        Configure the dataset for performance
-        """
-        train_ds, val_ds = configure_for_performance(train_ds, val_ds)
-
-        normalized_ds = normalize_train_ds(train_ds)
-
-        model = make_model()
-        train_model(train_ds, val_ds)
-
-        # model = make_model(image_size + (3,), 2)
-
-        # train_model(model, train_ds, val_ds)
+        make_all()
     else:
         model = keras.models.load_model(
             f"{KERA_PRED_FOLDER}/model")

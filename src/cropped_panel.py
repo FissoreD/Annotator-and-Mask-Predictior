@@ -4,12 +4,13 @@ from PIL import ImageTk
 from PIL.Image import Image
 import images
 from typing import List
-from tkinter.constants import BOTH, CENTER
+from tkinter.constants import BOTH, CENTER, LEFT
 import tkinter as tk
 import tags
 import scrollableframe as sf
 from ttkthemes import ThemedTk
 from sys import argv
+import nnl_process
 import window
 
 param = {'expand': 1, "fill": BOTH}
@@ -38,8 +39,8 @@ class Cropped_Panel(ttk.Frame):
         self.bottom_pane = ttk.PanedWindow(self.main_pane)
 
         self.bottom_pane.pack(fill=tk.BOTH)
-        self.main_pane.pack(expand=1, fill=tk.BOTH)
-        self.pack(expand=1, fill=tk.BOTH)
+        self.main_pane.pack(param)
+        self.pack(param)
         f1.grid(columnspan=self.mod, row=100)
 
         self.list_of_cropped_images: List[Image] = []
@@ -48,10 +49,21 @@ class Cropped_Panel(ttk.Frame):
         self.initialize()
 
     def initialize(self):
-        button = Button(self.bottom_pane,
-                        text='Create cropped images',
-                        command=self.cropped_images_listener)
-        button.pack()
+        button = ttk.Button(
+            self.bottom_pane,
+            text='Create cropped images',
+            command=self.cropped_images_listener)
+        launchPrediction = ttk.Button(
+            self.bottom_pane,
+            text='LaunchPrediction',
+            command=nnl_process.make_all)
+        # TODO make a listener on this button
+        makePrediction = ttk.Button(
+            self.bottom_pane,
+            text='MakePrediction')
+        button.pack(**param)
+        launchPrediction.pack(side=LEFT, **param)
+        makePrediction.pack(side=LEFT, **param)
 
     def cropped_images_listener(self):
         cp_list = self.list_of_cropped_images
