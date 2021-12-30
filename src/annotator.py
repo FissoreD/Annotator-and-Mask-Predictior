@@ -14,23 +14,23 @@ def window_parametrize(window):
     window.grab_set()
 
 
-class annotator:
+class annotator(tk.Toplevel):
 
     """ This class manages the windows which appears when we click on a selected image to make annotations """
 
     def __init__(self, frm, image):
+        super().__init__(frm)
         self.tag_list = image.tag_list
         self.frm = frm
-        self.window = tk.Toplevel(self.frm)
-        self.window.title("Annotator")
-        window_parametrize(self.window)
-        self.window.wm_resizable(False, False)
+        self.title("Annotator")
+        window_parametrize(self)
+        self.wm_resizable(False, False)
 
         self.rect_list = []
 
         self.image = image
 
-        mainPanel = ttk.PanedWindow(self.window)
+        mainPanel = ttk.PanedWindow(self)
         mainPanel.grid(row=0, column=0)
 
         im1: Image = image.big_image
@@ -55,9 +55,9 @@ class annotator:
 
         self.canvas.bind('<Motion>', self.draw_rect_on_motion)
         self.canvas.bind('<Button-1>', self.swap)
-        self.window.bind('<Escape>', self.escape)
+        self.bind('<Escape>', self.escape)
 
-        self.m = tk.Menu(self.window, tearoff=0)
+        self.m = tk.Menu(self, tearoff=0)
 
     def popup(self, event, r):
         """ Create and display the contextual menu at left-click mouse event on an annotation """
@@ -205,7 +205,7 @@ class annotator:
             If there are already tag names, a scrolling menu is proposed in which he can choose the wanted name
             else, in all cases, we propose to user to create one on the fly
         """
-        window = tk.Toplevel(self.window)
+        window = tk.Toplevel(self)
         window.title("Set tag")
         window_parametrize(window)
         panel = tk.PanedWindow(window)
@@ -233,7 +233,7 @@ class annotator:
                 """ We get chosen name and rename the current annotation"""
                 x = variable.get()
                 window.destroy()
-                window_parametrize(self.window)
+                window_parametrize(self)
                 do_rename(x)
             butt = ttk.Button(panel, text='Send', command=on_change)
             butt.pack(expand=1, fill=tk.BOTH)
@@ -254,7 +254,7 @@ class annotator:
             self.tag_list.add(x)
             do_rename(x)
             window.destroy()
-            window_parametrize(self.window)
+            window_parametrize(self)
 
         entry.bind("<Return>", lambda _: create_tag())
         entry.pack(expand=1, fill=tk.BOTH)

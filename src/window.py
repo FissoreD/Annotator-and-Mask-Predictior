@@ -6,6 +6,7 @@
 """
 
 from tkinter import Button, Frame, ttk, filedialog
+from annotator import annotator
 import cropped_panel
 import images as img
 from typing import List
@@ -20,6 +21,18 @@ from ttkthemes import ThemedTk
 from sys import argv
 
 param = {'expand': 1, "fill": BOTH}
+
+
+def annotate_on_the_fly(parent):
+    def save():
+        path = filedialog.askdirectory()
+        image.crop_image(path=path)
+    path = filedialog.askopenfilename(
+        filetypes=[('Images', '*.jpg *.png')])
+    image = img.Img(path)
+    image.set_tag_list(tags.Tag([image]))
+    w = annotator(parent, image)
+    ttk.Button(w, text="Save your annotations", command=save).pack(param)
 
 
 def get_selected_images(list_images: List[img.Img]):
@@ -39,11 +52,11 @@ class right_panel:
 
     """
 
-    def __init__(self, root, father, list_image, list_tag, left_panel) -> None:
+    def __init__(self, root, father, img_list, tag_list, left_panel) -> None:
         self.root = root
         self.father = father
-        self.list_img = list_image
-        self.list_tag = list_tag
+        self.img_list = img_list
+        self.tag_list = tag_list
         self.lp = left_panel
 
     def initialise(self):
@@ -55,12 +68,15 @@ class right_panel:
         self.select_option(self)
         f1 = [read_write.write_file,
               read_write.read_file]
-        save = ttk.Button(self.father, text='SaveToFile',
-                          command=lambda: f1[0](self.list_img))
-        load = ttk.Button(self.father, text='LoadFile',
-                          command=lambda: f1[1](self.list_img))
-        load.pack(param)
-        save.pack(param)
+        ttk.Button(
+            self.father, text='Annotate On-The-Fly',
+            command=lambda: annotate_on_the_fly(self.father)).pack(param)
+        ttk.Button(
+            self.father, text='SaveToFile',
+            command=lambda: f1[0](self.img_list)).pack(param)
+        ttk.Button(
+            self.father, text='LoadFile',
+            command=lambda: f1[1](self.img_list)).pack(param)
 
     class select_option:
         def __init__(self, rp) -> None:

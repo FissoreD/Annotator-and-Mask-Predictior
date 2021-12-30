@@ -74,8 +74,7 @@ def create_all_cropped_images(image_list):
         os.mkdir(folder)
     clear_floder(folder)
     for i in image_list:
-        if i.is_selected:
-            i.crop_image()
+        i.crop_image()
 
 
 if __name__ == '__main__':

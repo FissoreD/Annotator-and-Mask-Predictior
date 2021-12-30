@@ -185,11 +185,13 @@ class Img:
         self.is_selected = not self.is_selected
         self.imgLabel.config(opts[self.is_selected])
 
-    def crop_image(self, list=None):
+    def crop_image(self, list_of_cropped=None, path=None):
         """ For every tag of the image we create a sub-image and save it in 'crop_img' folder """
+        not_on_the_fly = path == None
+        path = path if path != None else path_to_cropped_img
         for tag, coordsList in self.tag_of_points.items():
-            folder_path = f"{path_to_cropped_img}/{tag}"
-            if not os.path.exists(folder_path):
+            folder_path = f"{path}/{tag}" if not_on_the_fly else path
+            if not os.path.exists(folder_path) and not_on_the_fly:
                 os.mkdir(folder_path)
             for coords in coordsList:
                 x1, y1, x2, y2 = coords
@@ -197,9 +199,10 @@ class Img:
                 file_name = f"{folder_path}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{x2-x1}-{y2-y1}.jpg"
                 cropped.thumbnail((180, 180), Image.ANTIALIAS)
                 cropped.convert('RGB').save(file_name, 'JPEG')
-                if list != None:
-                    list.append((cropped, tag))
-                nnl_process.remove_not_valid_images(file_name)
+                if list_of_cropped != None:
+                    list_of_cropped.append((cropped, tag))
+                if not_on_the_fly:
+                    nnl_process.remove_not_valid_images(file_name)
 
 
 if __name__ == '__main__':
