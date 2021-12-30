@@ -1,10 +1,10 @@
-from tkinter import Button, Frame, Label, ttk, filedialog
+from tkinter import Button, Frame, Label, messagebox, ttk, filedialog
 from PIL import ImageTk
-
+import os
 from PIL.Image import Image
 import images
 from typing import List
-from tkinter.constants import BOTH, CENTER, LEFT
+from tkinter.constants import BOTH, CENTER, E, INSERT, LEFT
 import tkinter as tk
 import tags
 import scrollableframe as sf
@@ -12,6 +12,7 @@ from ttkthemes import ThemedTk
 from sys import argv
 import nnl_process
 import window
+from tkinter.scrolledtext import ScrolledText
 
 param = {'expand': 1, "fill": BOTH}
 
@@ -53,16 +54,16 @@ class Cropped_Panel(ttk.Frame):
             self.bottom_pane,
             text='Create cropped images',
             command=self.cropped_images_listener)
-        launchPrediction = ttk.Button(
+        train_model = ttk.Button(
             self.bottom_pane,
-            text='LaunchPrediction',
+            text='Train the model',
             command=nnl_process.make_all)
-        # TODO make a listener on this button
         makePrediction = ttk.Button(
             self.bottom_pane,
-            text='MakePrediction')
+            text='Make Prediction',
+            command=self.make_prediction_panel)
         button.pack(**param)
-        launchPrediction.pack(side=LEFT, **param)
+        train_model.pack(side=LEFT, **param)
         makePrediction.pack(side=LEFT, **param)
 
     def cropped_images_listener(self):
@@ -78,3 +79,83 @@ class Cropped_Panel(ttk.Frame):
         for pos, lbl in enumerate(lb_list):
             lbl.grid(row=pos // self.mod, column=pos % self.mod,
                      ipadx=5, ipady=5, sticky='nswe')
+
+    def make_prediction_panel(self):
+        def make_perc(nb):
+            return round(float(nb * 100), 2)
+
+        def sel():
+            try:
+                isProba = var.get() == 2
+                res = nnl_process.predict(
+                    model, file_name.get(), isProba=isProba)
+                scroll.delete('1.0', tk.END)
+                if not isProba:
+                    scroll.insert(
+                        tk.INSERT, f"This image is a {res[0]} at {make_perc(res[1])} %")
+                else:
+                    L = sorted([(i, j) for (i, j) in zip(
+                        res[0], res[1])], key=lambda a: a[1], reverse=True)
+                    scroll.insert(tk.INSERT, f"This image is a:\n")
+                    for (i, j) in L:
+                        perc = make_perc(j)
+                        scroll.insert(tk.INSERT, f" - {i} at ")
+                        scroll.insert(tk.INSERT, f"{perc} %\n",
+                                      'red' if perc > 0 else 'blue')
+            except FileNotFoundError:
+                messagebox.showinfo("Error", "Choose a valid file")
+
+        def choose_path():
+            path = filedialog.askopenfilename(
+                filetypes=[('Images', '*.jpg *.png')])
+            file_name.delete(0, tk.END)
+            file_name.insert(0, path)
+            sel()
+
+        model = nnl_process.read_model()
+        tl = tk.Toplevel(self)
+        tl.focus()
+        tl.grab_set()
+
+        var = tk.IntVar()
+
+        choose_path_pnl = ttk.PanedWindow(tl)
+        file_name = ttk.Entry(choose_path_pnl)
+        send_bt = ttk.Button(choose_path_pnl, text='Send', command=sel)
+        file_name.pack(param, side=tk.LEFT)
+        send_bt.pack(**param, side=tk.LEFT)
+        choose_path_pnl.pack(param)
+
+        choose_path_bt = ttk.Button(
+            tl, text='Choose your image to analyse', command=choose_path)
+        choose_path_bt.pack(param)
+
+        panel_radio = ttk.PanedWindow(tl)
+
+        radio1 = ttk.Radiobutton(
+            panel_radio, text="Category", variable=var,
+            value=1, command=sel)
+        radio2 = ttk.Radiobutton(
+            panel_radio, text="Probability", variable=var,
+            value=2, command=sel)
+        radio1.pack(param, side=tk.LEFT)
+        radio2.pack(param, side=tk.LEFT)
+        panel_radio.pack(param)
+
+        scroll = ScrolledText(tl, width=20, height=10)
+        color_list = ['red', 'green', 'blue', 'magenta']
+        for i in color_list:
+            scroll.tag_config(i, foreground=i)
+        scroll.pack(param)
+
+
+if __name__ == "__main__":
+    tag_list = tags.Tag(images.open_files())
+    img_list = tag_list.imgs
+
+    for j in img_list:
+        j.set_tag_list(tag_list)
+
+    main = tk.Tk()
+    Cropped_Panel(main, img_list).make_prediction_panel()
+    main.mainloop()

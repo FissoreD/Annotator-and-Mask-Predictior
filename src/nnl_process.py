@@ -13,9 +13,8 @@ https://keras.io/examples/vision/image_classification_from_scratch/
 
 image_size = (180, 180)
 crop_dir = 'crop_img'
-epochs = 10
+epochs = 20
 KERA_PRED_FOLDER = 'keras_pred_folder'
-MODEL_PATH = f"{KERA_PRED_FOLDER}/model"
 
 
 def get_class_names():
@@ -66,16 +65,27 @@ def normalize_train_ds(train_ds):
 
 
 def make_model():
+    data_augmentation = keras.Sequential(
+        [
+            layers.RandomFlip("horizontal",
+                              input_shape=image_size+(3,)),
+            layers.RandomRotation(0.1),
+            layers.RandomZoom(0.1),
+        ]
+    )
     class_names = get_class_names()
     num_classes = len(class_names)
+    img_height, img_width = image_size
     model = keras.models.Sequential([
-        layers.Rescaling(1./255, input_shape=image_size + (3,)),
+        data_augmentation,
+        layers.Rescaling(1./255),
         layers.Conv2D(16, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
         layers.Conv2D(32, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
         layers.Conv2D(64, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
+        layers.Dropout(0.2),
         layers.Flatten(),
         layers.Dense(128, activation='relu'),
         layers.Dense(num_classes)
@@ -93,10 +103,18 @@ def train_model(train_ds, val_ds, model):
         validation_data=val_ds,
         epochs=epochs
     )
-    model.save(MODEL_PATH)
+    if not os.path.exists(KERA_PRED_FOLDER):
+        os.mkdir(KERA_PRED_FOLDER)
+    read_write.clear_floder(KERA_PRED_FOLDER)
+    model.save(KERA_PRED_FOLDER+'/model.h5', save_format='h5')
 
 
-def evaluate_image(model, img_path, toPrint=False):
+def predict(model, img_path, isProba=True, toPrint=False):
+    """
+    Make a prediction on an image
+    isProba -> optional if we search the probability for each class or the category [default set to True]
+    toPrint -> optional if we want to print on stdout the result of prediction [default set to False]
+    """
     class_names = get_class_names()
     img = tf.keras.utils.load_img(img_path, target_size=image_size)
     img_array = tf.keras.utils.img_to_array(img)
@@ -104,24 +122,19 @@ def evaluate_image(model, img_path, toPrint=False):
     predictions = model.predict(img_array)
     score = tf.nn.softmax(predictions[0])
     its_class = class_names[np.argmax(score)]
-    its_score = 100 * np.max(score)
+    its_score = np.max(score)
     if toPrint:
-        print(
-            "This image most likely belongs to {} with a {:.2f} percent confidence."
-            .format(its_class, its_score)
-        )
-    return its_class, its_score
-
-
-def draw_a_plot_of_data(train_ds):
-    import matplotlib.pyplot as plt
-    plt.figure(figsize=(10, 10))
-    for images, labels in train_ds.take(1):
-        for i in range(9):
-            ax = plt.subplot(3, 3, i + 1)
-            plt.imshow(images[i].numpy().astype("uint8"))
-            plt.title(train_ds.class_names[labels[i]])
-            plt.axis("off")
+        if isProba:
+            print(
+                "This image most likely belongs to {} with a {} percent confidence."
+                .format(class_names, score)
+            )
+        else:
+            print(
+                "This image most likely belongs to {} with a {:.2f} percent confidence."
+                .format(its_class, its_score*100)
+            )
+    return (its_class, its_score) if not isProba else (class_names, score)
 
 
 def make_all():
@@ -132,10 +145,15 @@ def make_all():
     # Configure the dataset for performance
     train_ds, val_ds = configure_for_performance(train_ds, val_ds)
 
-    normalized_ds = normalize_train_ds(train_ds)
+    normalize_train_ds(train_ds)
     model = make_model()
 
-    train_model(normalized_ds, val_ds, model)
+    train_model(train_ds, val_ds, model)
+    return model
+
+
+def read_model():
+    return keras.models.load_model(KERA_PRED_FOLDER+"/model.h5")
 
 
 if __name__ == "__main__":
@@ -154,18 +172,18 @@ if __name__ == "__main__":
         read_write.read_file(img_list, file_path="annotation/test.json")
         read_write.create_all_cropped_images(img_list)
 
-        make_all()
+        model = make_all()
     else:
-        model = keras.models.load_model(
-            f"{KERA_PRED_FOLDER}/model")
+        model = read_model()
 
-    image_path = 'crop_img/No/image_000-bb-15x0-307-431.jpg'
-    evaluate_image(model, image_path)
+    image_path = 'test_img/image_005-bb-125x177-156-224.jpg'
+    predict(model, image_path, toPrint=True)
 
     """
     Here we test all images wrt our model
     """
-    for under_dir in os.listdir(crop_dir):
-        for file_name in os.listdir(crop_dir+"/"+under_dir):
-            path = f"{crop_dir}/{under_dir}/{file_name}"
-            print(f"{under_dir} {file_name} {evaluate_image(model,path)}")
+    # for under_dir in os.listdir(crop_dir):
+    #     for file_name in os.listdir(crop_dir+"/"+under_dir):
+    #         path = f"{crop_dir}/{under_dir}/{file_name}"
+    #         print(f"{under_dir} {file_name} {predict(model,path)}")
+    #         break

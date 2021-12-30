@@ -12,7 +12,7 @@ from tkinter import filedialog
 
 def find_image(img_path, list_img):
     for i in list_img:
-        if img_path == i.path:
+        if os.path.abspath(img_path) == os.path.abspath(i.path):
             return i
 
 
@@ -33,6 +33,8 @@ def read_file(list_img, file_path=None):
         return
     for elt in D:
         img = find_image(elt[0], list_img)
+        if img == None:
+            continue
         for tag_name in elt[1]:
             for coor in elt[1][tag_name]:
                 img.add_tag(tag_name, *coor, None)
@@ -54,10 +56,7 @@ def write_file(list_img):
     file.close()
 
 
-def create_all_cropped_images(image_list):
-    folder = "crop_img"
-    if not os.path.exists(folder):
-        os.mkdir(folder)
+def clear_floder(folder):
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
         try:
@@ -67,6 +66,13 @@ def create_all_cropped_images(image_list):
                 shutil.rmtree(file_path)
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+
+def create_all_cropped_images(image_list):
+    folder = "crop_img"
+    if not os.path.exists(folder):
+        os.mkdir(folder)
+    clear_floder(folder)
     for i in image_list:
         if i.is_selected:
             i.crop_image()

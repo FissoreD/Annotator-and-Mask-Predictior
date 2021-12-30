@@ -80,23 +80,13 @@ class right_panel:
             for j in self.rp.list_img:
                 j.set_tag_list(tag_list)
             self.rp.lp.updateSelected(None)
-            return
 
         def create_buttons(self):
             """ Creation of practical button like the possibility of check/uncheck all images or change the folder of images """
-            self.lab = ttk.Label(
-                self.main, text='Check/Uncheck box', anchor=CENTER)
             bp = ttk.PanedWindow(self.main)
-            self.b1 = ttk.Button(bp, text='CheckAll',
-                                 command=lambda: self.listener(True))
-            self.b2 = ttk.Button(bp, text='UncheckAll',
-                                 command=lambda: self.listener(False))
             self.b3 = ttk.Button(bp, text='Open Images From Folder',
                                  command=lambda: self.charge_img_folder(None))
-            self.b1.grid(column=0, row=0, sticky='nsew')
-            self.b2.grid(column=1, row=0, sticky='nsew')
-            self.b3.grid(column=0, row=1, columnspan=2, sticky='nsew')
-            self.lab.pack(fill=BOTH)
+            self.b3.grid(column=0, row=0, sticky='nsew')
             bp.pack()
 
         def listener(self, select_all):
@@ -231,7 +221,7 @@ class main_class:
 
 def main(list_tag, list_img: List[img.Img], themedMode=True):
 
-    root = ThemedTk(theme='black') if themedMode else tk.Tk()
+    root = ThemedTk() if themedMode else tk.Tk()
     main_class(list_tag, list_img, root)
 
     root.minsize(980, 500)
