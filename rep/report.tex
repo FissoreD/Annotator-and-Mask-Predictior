@@ -1,0 +1,39 @@
+\documentclass[a4paper, 11pt]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+
+\begin{document}
+\title{
+  Annotator and Mask recognizer \\
+  \large Master 2 at University Of Côte d'Azur
+}
+\author{Fissore Davide, Galbiati Federica and Venturelli Antoine}
+\maketitle
+\tableofcontents
+
+\section{Overview}
+Overview
+Programming language Python version 3.9.7 with following libraries :
+\begin{itemize}
+  \item PIL to load and treat images
+  \item tkinter to charge the graphic interface
+  \item json to save and load json encoded files
+  \item ttkthemes to get a larger library of theme for our interface
+  \item tkhtmlview to display simple HTML and CSS text
+  \item shapely to work on shapes and get coverage methods
+\end{itemize}
+\section{ How to run the project }
+The project can be launched from the src folder (this is mandatory so that imports of local
+files go correctly) opening the  window.py  file. It  will take few seconds to load all libraries, for
+example the ttkthemes import is a bit slow and also the interface will be less reactive, to
+avoid this you can pass the  “-fast”  optional parameter  to open the classic tk.Tk() window
+(exemple  python3 ./window.py -fast,  note that the  python3 command may not work on
+some OS for example in certain windows distributions you should use py).
+this a subsecction
+\subsection{Sub 1}
+uuuf
+
+\end{document}
