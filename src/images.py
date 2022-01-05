@@ -65,7 +65,7 @@ class Img:
 
         """ The image of annotator """
         big_image: Image = Image.open(img_path)
-        maxSize = 500
+        maxSize = 600
         XSIZE = maxSize if big_image.width > big_image.height else maxSize * \
             big_image.width//big_image.height
         YSIZE = maxSize if big_image.height > big_image.width else maxSize * \
@@ -85,7 +85,6 @@ class Img:
             Before adding the tag in the list, we make sure that it is valid by checking its size
             or if it is in conflict with another one (via several 'shapely' pre-built utility methods)
         """
-
         x1, x2, y1, y2 = min(x1, x2), max(x1, x2), min(y1, y2), max(y1, y2)
         coords = [x1, y1, x2, y2]
         box_from_coord = box(x1, y1, x2, y2)
@@ -110,12 +109,14 @@ class Img:
             self.tag_list.add(tag)
             self.tag_of_points[tag] = [coords]
             self.tag_of_rect[tag] = [[box_from_coord, rect_id]]
+        self.inEvidence()
         return True
 
     def remove_if_empty(self, tag):
         if len(self.tag_of_points[tag]) == 0:
             self.tag_of_points.pop(tag)
             self.tag_of_rect.pop(tag)
+            self.inEvidence()
 
     def delete_from_id(self, id):
         for tag in self.tag_of_rect:
@@ -129,6 +130,7 @@ class Img:
     def remove_tag(self, tag):
         self.tag_of_points.pop(tag, None)
         self.tag_of_rect.pop(tag, None)
+        self.inEvidence()
 
     def find_tag_by_rect_id(self, rect_id):
         for key, value in self.tag_of_rect.items():
@@ -160,16 +162,10 @@ class Img:
     def __repr__(self):
         return self.__str__()
 
-    def createMiniLabel(self, frm):
-        """ In 'All images' tab, if we click on an image, we select it and make it highlighted """
-        imgLabel = create_image(frm, self.img)
-        self.imgLabel = imgLabel
-        imgLabel.bind("<Button>", self.mouseClick)
-        return imgLabel
-
     def createMiniLabel2(self, frm):
         """ In 'Selected images' tab, if we rigth-click on an image, the annotator class's window appears """
         imgLabel = create_image(frm, self.img)
+        self.imgLabel = imgLabel
         imgLabel.bind("<Button-1>", lambda _: annotator.main(frm, self))
         imgLabel.config(relief="sunken")
         return imgLabel
@@ -196,13 +192,25 @@ class Img:
             for coords in coordsList:
                 x1, y1, x2, y2 = coords
                 cropped: Image = self.big_image.crop(coords)
-                file_name = f"{folder_path}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{x2-x1}-{y2-y1}.jpg"
+                height = y2 - y1
+                width = x2 - x1
+                # if (height < 100 or width < 100) and not_on_the_fly:
+                #     continue
+                file_name = f"{folder_path}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{width}-{height}.jpg"
                 cropped.thumbnail((180, 180), Image.ANTIALIAS)
                 cropped.convert('RGB').save(file_name, 'JPEG')
                 if list_of_cropped != None:
                     list_of_cropped.append((cropped, tag))
                 if not_on_the_fly:
                     nnl_process.remove_not_valid_images(file_name)
+
+    def inEvidence(self):
+        opts = [
+            {"relief": "flat", "bg": "SystemButtonFace", "fg": "SystemButtonFace"},
+            {"relief": "sunken", "bg": "gray51", "fg": "white"}
+        ]
+        is_selected = len(self.tag_of_points) > 0
+        self.imgLabel.config(opts[is_selected])
 
 
 if __name__ == '__main__':

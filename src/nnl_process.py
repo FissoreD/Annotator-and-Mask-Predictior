@@ -13,6 +13,7 @@ https://keras.io/examples/vision/image_classification_from_scratch/
 
 image_size = (180, 180)
 crop_dir = 'crop_img'
+test_img = 'test_img'
 epochs = 20
 KERA_PRED_FOLDER = 'keras_pred_folder'
 
@@ -59,11 +60,6 @@ def configure_for_performance(train_ds, val_ds):
     return train_ds, val_ds
 
 
-def normalize_train_ds(train_ds):
-    normalization_layer = layers.Rescaling(1./255)
-    return train_ds.map(lambda x, y: (normalization_layer(x), y))
-
-
 def make_model():
     data_augmentation = keras.Sequential(
         [
@@ -75,7 +71,6 @@ def make_model():
     )
     class_names = get_class_names()
     num_classes = len(class_names)
-    img_height, img_width = image_size
     model = keras.models.Sequential([
         data_augmentation,
         layers.Rescaling(1./255),
@@ -98,7 +93,7 @@ def make_model():
 
 
 def train_model(train_ds, val_ds, model):
-    model.fit(
+    history = model.fit(
         train_ds,
         validation_data=val_ds,
         epochs=epochs
@@ -107,6 +102,7 @@ def train_model(train_ds, val_ds, model):
         os.mkdir(KERA_PRED_FOLDER)
     read_write.clear_floder(KERA_PRED_FOLDER)
     model.save(KERA_PRED_FOLDER+'/model.h5', save_format='h5')
+    return history
 
 
 def predict(model, img_path, isProba=True, toPrint=False):
@@ -145,19 +141,39 @@ def make_all():
     # Configure the dataset for performance
     train_ds, val_ds = configure_for_performance(train_ds, val_ds)
 
-    normalize_train_ds(train_ds)
     model = make_model()
 
-    train_model(train_ds, val_ds, model)
-    return model
+    history = train_model(train_ds, val_ds, model)
+    return model, history
 
 
 def read_model():
     return keras.models.load_model(KERA_PRED_FOLDER+"/model.h5")
 
 
+def rename_test_img():
+    diff = 0
+    for pos, file_name in enumerate(os.listdir(test_img)):
+        no = 'No'
+        if file_name[0] == 'M':
+            diff += 1
+            no = ''
+        else:
+            pos -= diff
+        name = f"{no}Mask_{pos}.jpg"
+        os.rename(
+            os.path.join(test_img, file_name),
+            os.path.join(test_img, name))
+
+
+def test_all():
+    for file_name in os.listdir(test_img):
+        path = f"{test_img}/{file_name}"
+        print(f"{path} { predict(model, path, isProba = False)}")
+
+
 if __name__ == "__main__":
-    is_create_model = False
+    is_create_model = True
     if is_create_model:
         """ 
         Creation of images with annotation from file 
@@ -172,18 +188,14 @@ if __name__ == "__main__":
         read_write.read_file(img_list, file_path="annotation/test.json")
         read_write.create_all_cropped_images(img_list)
 
-        model = make_all()
+        model, history = make_all()
     else:
         model = read_model()
 
-    image_path = 'test_img/image_005-bb-125x177-156-224.jpg'
+    image_path = 'test_img/Mask_0.jpg'
     predict(model, image_path, toPrint=True)
 
     """
     Here we test all images wrt our model
     """
-    # for under_dir in os.listdir(crop_dir):
-    #     for file_name in os.listdir(crop_dir+"/"+under_dir):
-    #         path = f"{crop_dir}/{under_dir}/{file_name}"
-    #         print(f"{under_dir} {file_name} {predict(model,path)}")
-    #         break
+    # test_all()
