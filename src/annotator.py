@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import Toplevel, ttk
 from tkinter.constants import BOTH
 from PIL import Image
 from PIL import ImageTk
@@ -211,7 +211,12 @@ class annotator(tk.Toplevel):
         panel = tk.PanedWindow(window)
         panel.pack(padx=10, pady=10)
 
+        choose_tag = 'Choose tag'
+
         L = [i for i in self.image.tag_list if i != invalid_word]
+
+        variable = tk.StringVar(panel)
+        variable.set(choose_tag)
 
         def do_rename(x):
             if is_renaming[0]:
@@ -220,18 +225,20 @@ class annotator(tk.Toplevel):
                 self.tag_list.rename(invalid_word, x.capitalize())
 
         """ Check if the user have existing tags, if so, we create the option menu """
-        if len(L) != 0:
-            x = L[0]
-
-            variable = tk.StringVar(panel)
-            variable.set(x)
-
-            opt = ttk.OptionMenu(panel, variable, L[0], *L)
+        if len(L) > 0:
+            current = choose_tag
+            if is_renaming[0]:
+                current = self.image.find_tag_by_rect_id(is_renaming[1])[0]
+            opt = ttk.OptionMenu(panel, variable, current, *L)
             opt.pack(expand=1, fill=BOTH)
 
             def on_change():
                 """ We get chosen name and rename the current annotation"""
                 x = variable.get()
+                if x == choose_tag:
+                    messagebox.showinfo(
+                        'Error', 'You must choose a valid tag !')
+                    return
                 window.destroy()
                 window_parametrize(self)
                 do_rename(x)
@@ -262,6 +269,9 @@ class annotator(tk.Toplevel):
         creator = ttk.Button(
             panel, text="Create And Send", command=create_tag)
         creator.pack(expand=1, fill=tk.BOTH)
+        window.protocol(
+            "WM_DELETE_WINDOW",
+            lambda: (self.delete_elt(self.r, '') if entry.get() == '' and variable.get() == 'Choose tag' else None, window.destroy()))
 
 
 def main(frm, frame):
