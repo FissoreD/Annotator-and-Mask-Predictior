@@ -1,4 +1,5 @@
 import os
+import sys
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -8,7 +9,7 @@ import tags
 import numpy as np
 from global_vars import *
 """
-A lot of code of this file is inspired from the following internet page : 
+A lot of code of this file is inspired from the following internet page :
 https://keras.io/examples/vision/image_classification_from_scratch/
 """
 
@@ -18,8 +19,8 @@ def get_class_names():
 
 
 def remove_not_valid_images(path):
-    """ 
-    This function aim to remove corrupted images (those whose name does not start with JFIF) 
+    """
+    This function aim to remove corrupted images (those whose name does not start with JFIF)
     """
     try:
         fobj = open(path, "rb")
@@ -70,10 +71,10 @@ def make_model():
         data_augmentation,
         layers.Rescaling(1./255),
         layers.Conv2D(16, 3, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Conv2D(32, 3, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Conv2D(64, 3, padding='same', activation='relu'),
+        # layers.MaxPooling2D(),
+        # layers.Conv2D(32, 3, padding='same', activation='relu'),
+        # layers.MaxPooling2D(),
+        # layers.Conv2D(64, 3, padding='same', activation='relu'),
         layers.MaxPooling2D(),
         layers.Dropout(0.2),
         layers.Flatten(),
@@ -161,21 +162,35 @@ def rename_test_img():
             os.path.join(test_img, name))
 
 
-def test_all():
+def test_all(model):
     """
     Make a prediction on every file in test_img folder,
     printing the result in STDOUT
     """
+    L = [('File name', 'Res', 'Proba')]
+    length = map(len, L[0])
     for file_name in os.listdir(test_img):
         path = f"{test_img}/{file_name}"
-        print(f"{path} { predict(model, path, isProba = False)}")
+        res, proba = predict(model, path, isProba=False)
+        proba = "{:.2f}".format(float(proba))
+        tup = file_name, res, proba
+        length = map(max, zip(length, map(len, tup)))
+        L.append(tup)
+    length = list(length)
+    print(length)
+    for pos, i in enumerate(L):
+        print("| {: <{}} | {: <{}} | {: <{}} |".format(
+            *[item for sublist in zip(i, length) for item in sublist]
+        ))
+        if pos == 0:
+            print("| {} | {} | {} |".format(*['-' * i for i in length]))
 
 
 if __name__ == "__main__":
-    is_create_model = True
+    is_create_model = False or len(sys.argv) > 1
     if is_create_model:
-        """ 
-        Creation of images with annotation from file 
+        """
+        Creation of images with annotation from file
         for testing phase
         """
         tag_list = tags.Tag(images.open_files())
@@ -191,9 +206,9 @@ if __name__ == "__main__":
     else:
         model = read_model()
 
-    image_path = 'test_img/Mask_0.jpg'
+    image_path = test_img + '/Mask_0.jpg'
     predict(model, image_path, toPrint=True)
-    test_all()
+    test_all(model)
 
     """
     Here we test all images wrt our model
