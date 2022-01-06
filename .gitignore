@@ -131,7 +131,8 @@ src/output.json
 test.py
 crop_img
 keras_pred_folder
-annotation
+*/annotation/**
+!*/annotation/test.json
 .vscode
 rep/**
 !*.tex
