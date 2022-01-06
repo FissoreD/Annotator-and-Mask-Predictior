@@ -5,7 +5,7 @@
         ask for images to image_reader library
 """
 
-from tkinter import Button, Frame, ttk, filedialog
+from tkinter import Frame, ttk, filedialog
 from annotator import annotator
 import cropped_panel
 import images as img

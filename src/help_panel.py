@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter.constants import BOTH, LEFT
-from tkinter import Frame, ttk
+from tkinter.constants import BOTH
+from tkinter import ttk
+from global_vars import *
 from tkhtmlview import HTMLLabel
 
 """ This file aims to manage the tag 'Help' """
@@ -13,17 +14,10 @@ button_properties = {
 }
 
 file_path_list = [
-    'text/text_allimg.html',
-    'text/text_selectimg.html',
-    'text/text_tags.html',
-    'text/text_others.html'
-]
-
-button_title = [
-    'All images',
-    'Selected images',
-    'Tags',
-    'Others'
+    ('All images', 'text_allimg.html'),
+    ('Selected images', 'text_selectimg.html'),
+    ('Tags', 'text_tags.html'),
+    ('Others', 'text_others.html')
 ]
 
 
@@ -50,8 +44,8 @@ def create_button(panel_left, panel_right, pos):
     """ Create a button with panel_left as parent and the rigth_panel method as effect """
     return tk.Button(panel_left,
                      **button_properties,
-                     text=button_title[pos],
-                     command=lambda: right_panel(panel_right, file_path_list[pos]))
+                     text=file_path_list[pos][0],
+                     command=lambda: right_panel(panel_right, test_for_help + file_path_list[pos][1]))
 
 
 def main(parent):

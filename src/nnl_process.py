@@ -6,16 +6,11 @@ import read_write
 import images
 import tags
 import numpy as np
+from global_vars import *
 """
 A lot of code of this file is inspired from the following internet page : 
 https://keras.io/examples/vision/image_classification_from_scratch/
 """
-
-image_size = (180, 180)
-crop_dir = 'crop_img'
-test_img = 'test_img'
-epochs = 20
-KERA_PRED_FOLDER = 'keras_pred_folder'
 
 
 def get_class_names():
@@ -167,6 +162,10 @@ def rename_test_img():
 
 
 def test_all():
+    """
+    Make a prediction on every file in test_img folder,
+    printing the result in STDOUT
+    """
     for file_name in os.listdir(test_img):
         path = f"{test_img}/{file_name}"
         print(f"{path} { predict(model, path, isProba = False)}")
@@ -185,7 +184,7 @@ if __name__ == "__main__":
         for j in img_list:
             j.set_tag_list(tag_list)
 
-        read_write.read_file(img_list, file_path="annotation/test.json")
+        read_write.read_file(img_list, file_path=json_test)
         read_write.create_all_cropped_images(img_list)
 
         model, history = make_all()
@@ -194,6 +193,7 @@ if __name__ == "__main__":
 
     image_path = 'test_img/Mask_0.jpg'
     predict(model, image_path, toPrint=True)
+    test_all()
 
     """
     Here we test all images wrt our model

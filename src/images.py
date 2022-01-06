@@ -5,19 +5,14 @@
           an association
 """
 import os
-from typing import List
-from os import listdir
-from PIL import Image, UnidentifiedImageError
 import json
-from PIL import ImageTk, Image
+from PIL import ImageTk, Image, UnidentifiedImageError
 import tkinter as tk
 import annotator
 import itertools
 from shapely.geometry import box
 import nnl_process
-
-path_to_image: str = "../img"
-path_to_cropped_img: str = "./crop_img"
+from global_vars import *
 
 
 def is_valid_image(image: str):
@@ -36,8 +31,8 @@ def create_image(parent, img):
 
 
 def open_files():
-    """ Return a list of images (according to the path name given in listdir argument"""
-    imgs = map(is_valid_image, listdir(path_to_image))
+    """ Return a list of images (according to the path name given in listdir argument) """
+    imgs = map(is_valid_image, os.listdir(path_to_image))
     return [i for i in imgs if i != None]
 
 
@@ -173,7 +168,7 @@ class Img:
     def crop_image(self, list_of_cropped=None, path=None):
         """ For every tag of the image we create a sub-image and save it in 'crop_img' folder """
         not_on_the_fly = path == None
-        path = path if path != None else path_to_cropped_img
+        path = path if path != None else crop_dir
         for tag, coordsList in self.tag_of_points.items():
             folder_path = f"{path}/{tag}" if not_on_the_fly else path
             if not os.path.exists(folder_path) and not_on_the_fly:
@@ -183,10 +178,10 @@ class Img:
                 cropped: Image = self.big_image.crop(coords)
                 height = y2 - y1
                 width = x2 - x1
-                # if (height < 100 or width < 100) and not_on_the_fly:
-                #     continue
+                ratio = min(180 / height, 180 / width)
                 file_name = f"{folder_path}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{width}-{height}.jpg"
-                cropped.thumbnail((180, 180), Image.ANTIALIAS)
+                cropped = cropped.resize(
+                    (int(width*ratio), int(height*ratio)), Image.ANTIALIAS)
                 cropped.convert('RGB').save(file_name, 'JPEG')
                 if list_of_cropped != None:
                     list_of_cropped.append((cropped, tag))
@@ -199,7 +194,10 @@ class Img:
             {"bg": "gray51", "fg": "white"}
         ]
         is_selected = len(self.tag_of_points) > 0
-        self.imgLabel.config(opts[is_selected])
+        try:
+            self.imgLabel.config(opts[is_selected])
+        except AttributeError:
+            pass
 
 
 if __name__ == '__main__':

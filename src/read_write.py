@@ -2,10 +2,11 @@ from tkinter.constants import NONE
 from typing import List
 import images
 import tags
-import json
 import os
+import json
 import shutil
 from tkinter import filedialog
+from global_vars import *
 
 """ This file is all about reading and writing files """
 
@@ -69,10 +70,9 @@ def clear_floder(folder):
 
 
 def create_all_cropped_images(image_list):
-    folder = "crop_img"
-    if not os.path.exists(folder):
-        os.mkdir(folder)
-    clear_floder(folder)
+    if not os.path.exists(crop_dir):
+        os.mkdir(crop_dir)
+    clear_floder(crop_dir)
     for i in image_list:
         i.crop_image()
 
