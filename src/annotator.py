@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Toplevel, ttk
+from tkinter import ttk
 from tkinter.constants import BOTH
 from PIL import Image
 from PIL import ImageTk
@@ -174,10 +174,10 @@ class annotator(tk.Toplevel):
             pass
 
         if isEntering and not self.is_clicked:
-            self.idtooltip2 = self.canvas.create_text(4, self.canvas.winfo_height() - 4,
-                                                      text=self.image.find_tag_by_rect_id(
-                                                          r)[0],
-                                                      anchor='sw')
+            self.idtooltip2 = self.canvas.create_text(
+                4, self.canvas.winfo_height() - 4,
+                text=self.image.find_tag_by_rect_id(r)[0],
+                anchor='sw')
             self.idtooltip = self.canvas.create_rectangle(
                 self.canvas.bbox(self.idtooltip2), fill="white")
             self.canvas.tag_lower(self.idtooltip, self.idtooltip2)
@@ -252,7 +252,7 @@ class annotator(tk.Toplevel):
         def create_tag():
             """
                 If the entry is the empty string or the invalid_word, we display an warning message, else
-                we correctly rename the current annotation, add the tag in the tag list and close the window. 
+                we correctly rename the current annotation, add the tag in the tag list and close the window.
             """
             x = entry.get()
             if x == "" or x.capitalize() == invalid_word:

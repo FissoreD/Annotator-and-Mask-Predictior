@@ -170,17 +170,6 @@ class Img:
         imgLabel.config(relief="sunken")
         return imgLabel
 
-    def select(self, b):
-        self.mouseClick(None) if self.is_selected != b else None
-
-    def mouseClick(self, event):
-        opts = [
-            {"relief": "flat", "bg": "SystemButtonFace", "fg": "SystemButtonFace"},
-            {"relief": "sunken", "bg": "gray51", "fg": "white"}
-        ]
-        self.is_selected = not self.is_selected
-        self.imgLabel.config(opts[self.is_selected])
-
     def crop_image(self, list_of_cropped=None, path=None):
         """ For every tag of the image we create a sub-image and save it in 'crop_img' folder """
         not_on_the_fly = path == None
@@ -206,8 +195,8 @@ class Img:
 
     def inEvidence(self):
         opts = [
-            {"relief": "flat", "bg": "SystemButtonFace", "fg": "SystemButtonFace"},
-            {"relief": "sunken", "bg": "gray51", "fg": "white"}
+            {"bg": "SystemButtonFace", "fg": "SystemButtonFace"},
+            {"bg": "gray51", "fg": "white"}
         ]
         is_selected = len(self.tag_of_points) > 0
         self.imgLabel.config(opts[is_selected])
