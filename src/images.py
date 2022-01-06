@@ -169,6 +169,8 @@ class Img:
         """ For every tag of the image we create a sub-image and save it in 'crop_img' folder """
         not_on_the_fly = path == None
         path = path if path != None else crop_dir
+        if not_on_the_fly and not os.path.exists(path):
+            os.mkdir(path)
         for tag, coordsList in self.tag_of_points.items():
             folder_path = f"{path}/{tag}" if not_on_the_fly else path
             if not os.path.exists(folder_path) and not_on_the_fly:
@@ -180,8 +182,9 @@ class Img:
                 width = x2 - x1
                 ratio = min(180 / height, 180 / width)
                 file_name = f"{folder_path}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{width}-{height}.jpg"
-                cropped = cropped.resize(
-                    (int(width*ratio), int(height*ratio)), Image.ANTIALIAS)
+                if not_on_the_fly:
+                    cropped = cropped.resize(
+                        (int(width*ratio), int(height*ratio)), Image.ANTIALIAS)
                 cropped.convert('RGB').save(file_name, 'JPEG')
                 if list_of_cropped != None:
                     list_of_cropped.append((cropped, tag))

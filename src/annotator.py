@@ -114,8 +114,11 @@ class annotator(tk.Toplevel):
                 pass
             self.old_coords = (x, y)
         else:
-            res = self.image.add_tag(
-                invalid_word, *self.old_coords, event.x, event.y, self.r)
+            try:
+                res = self.image.add_tag(
+                    invalid_word, *self.old_coords, event.x, event.y, self.r)
+            except AttributeError:
+                return
             if res == False:
                 self.delete_elt(self.r, "The selected zone is too small")
                 return

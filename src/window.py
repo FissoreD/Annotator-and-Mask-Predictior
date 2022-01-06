@@ -26,9 +26,13 @@ param = {'expand': 1, "fill": BOTH}
 def annotate_on_the_fly(parent):
     def save():
         path = filedialog.askdirectory()
+        if path == '':
+            return
         image.crop_image(path=path)
     path = filedialog.askopenfilename(
         filetypes=[('Images', '*.jpg *.png')])
+    if path == '':
+        return
     image = img.Img(path)
     image.set_tag_list(tags.Tag([image]))
     w = annotator(parent, image)
@@ -87,7 +91,10 @@ class right_panel:
             self.main.pack(param)
 
         def charge_img_folder(self, _):
-            img.path_to_image = filedialog.askdirectory()
+            new_path = filedialog.askdirectory()
+            if new_path == '':
+                return
+            img.path_to_image = new_path
             tag_list = self.rp.list_tag
             tag_list.imgs = img.open_files()
             while self.rp.list_img:
