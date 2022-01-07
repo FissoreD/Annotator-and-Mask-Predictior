@@ -173,7 +173,7 @@ def test_all(model):
         path = f"{test_img}/{file_name}"
         res, proba = predict(model, path, isProba=False)
         proba = "{:.2f}".format(float(proba))
-        tup = file_name, res, proba
+        tup = f"![{file_name}]({path})", res, proba
         length = map(max, zip(length, map(len, tup)))
         L.append(tup)
     length = list(length)
@@ -206,8 +206,8 @@ if __name__ == "__main__":
     else:
         model = read_model()
 
-    image_path = test_img + '/Mask_0.jpg'
-    predict(model, image_path, toPrint=True)
+    # image_path = test_img + '/Mask_0.jpg'
+    # predict(model, image_path, toPrint=True)
     test_all(model)
 
     """

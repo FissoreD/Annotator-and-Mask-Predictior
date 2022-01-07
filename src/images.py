@@ -182,9 +182,8 @@ class Img:
                 width = x2 - x1
                 ratio = min(180 / height, 180 / width)
                 file_name = f"{folder_path}/{self.path.split('/')[-1].split('.')[0]}-bb-{x1}x{y1}-{width}-{height}.jpg"
-                if not_on_the_fly:
-                    cropped = cropped.resize(
-                        (int(width*ratio), int(height*ratio)), Image.ANTIALIAS)
+                cropped = cropped.resize(
+                    (int(width*ratio), int(height*ratio)), Image.ANTIALIAS)
                 cropped.convert('RGB').save(file_name, 'JPEG')
                 if list_of_cropped != None:
                     list_of_cropped.append((cropped, tag))

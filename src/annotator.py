@@ -4,6 +4,8 @@ from tkinter.constants import BOTH
 from PIL import Image
 from PIL import ImageTk
 from tkinter import messagebox
+import tags
+import images
 
 """ Default tag's name before its real attributed name """
 invalid_word = "&#undefined"
@@ -20,7 +22,6 @@ class annotator(tk.Toplevel):
 
     def __init__(self, frm, image):
         super().__init__(frm)
-        self.tag_list = image.tag_list
         self.frm = frm
         self.title("Annotator")
         window_parametrize(self)
@@ -29,6 +30,7 @@ class annotator(tk.Toplevel):
         self.rect_list = []
 
         self.image = image
+        self.tag_list = image.tag_list
 
         mainPanel = ttk.PanedWindow(self)
         mainPanel.grid(row=0, column=0)
@@ -280,3 +282,9 @@ class annotator(tk.Toplevel):
 def main(frm, frame):
     """ Create an instance of the class annotator """
     annotator(frm, frame)
+
+
+if __name__ == '__main__':
+    root = tk.Tk()
+    annotator(root, images.Img('../pre/test_img/Mask_0.jpg'))
+    root.mainloop()
