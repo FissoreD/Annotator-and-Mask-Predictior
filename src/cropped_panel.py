@@ -1,6 +1,7 @@
 from tkinter import Label, ttk, filedialog
 from PIL import ImageTk
 from PIL.Image import Image
+import PIL
 import images
 from typing import List
 from tkinter.constants import BOTH, LEFT
@@ -15,9 +16,11 @@ from global_vars import *
 param = {'expand': 1, "fill": BOTH}
 
 
-def create_image(parent, img, tag_name):
+def create_image(parent, img: Image, tag_name):
     pnl = ttk.Frame(parent, borderwidth=1)
     Label(pnl, text=tag_name).pack(param)
+    img = img.resize(
+        (int(img.width * 0.8), int(img.height * 0.8)), PIL.Image.HAMMING)
     photo = ImageTk.PhotoImage(img)
     imgLabel = Label(pnl, image=photo, anchor=tk.CENTER)
     imgLabel.image = photo
@@ -31,38 +34,53 @@ class Cropped_Panel(ttk.Frame):
         self.mod = 4
 
         self.main_pane = ttk.PanedWindow(self)
-        self.upper_pane = sf.create_scrollable_frame(self.main_pane)
-        f1 = tk.Frame(self.upper_pane)
-        self.upper_pane.canvas.bind(
-            '<Configure>', lambda e: f1.config(width=e.width))
-        self.bottom_pane = ttk.PanedWindow(self.main_pane)
 
-        self.bottom_pane.pack(fill=tk.BOTH)
-        self.main_pane.pack(param)
+        self.botton_panel = ttk.PanedWindow(self.main_pane)
+
+        self.image_panel = ttk.PanedWindow(self.main_pane)
+        self.image_panel_scroll = sf.create_scrollable_frame(self.image_panel)
+        f1 = tk.Frame(self.image_panel_scroll)
+        self.image_panel_scroll.canvas.bind(
+            '<Configure>', lambda e: f1.config(width=e.width))
+
+        self.image_panel.pack(param, side=LEFT)
+        self.botton_panel.pack(expand=1)
         self.pack(param)
         f1.grid(columnspan=self.mod, row=100)
 
         self.list_of_cropped_images: List[Image] = []
         self.list_of_cropped_labels: List[Label] = []
         self.img_list = img_list
-        self.initialize()
+        self.initialize(self.botton_panel)
+        self.main_pane.pack(param)
 
-    def initialize(self):
+    def initialize(self, parent):
         button = ttk.Button(
-            self.bottom_pane,
+            parent,
             text='Create cropped images',
             command=self.cropped_images_listener)
         train_model = ttk.Button(
-            self.bottom_pane,
+            parent,
             text='Train the model',
-            command=nnl_process.make_all)
+            command=nnl_process.train_the_model)
         makePrediction = ttk.Button(
-            self.bottom_pane,
+            parent,
             text='Make Prediction',
             command=self.make_prediction_panel)
+
+        self.text = tk.Text(parent, width=20, height=20, wrap='word')
+        self.text.insert(tk.END,
+                         "This panel is for make prediction :\n"
+                         "1. Click crop images\n"
+                         "2. Train the model\n"
+                         "3. Make prediction\n"
+                         "The model created, you can reuse "
+                         "it to make other predictions")
+
         button.pack(**param)
-        train_model.pack(side=LEFT, **param)
-        makePrediction.pack(side=LEFT, **param)
+        train_model.pack(**param)
+        makePrediction.pack(**param)
+        self.text.pack(**param)
 
     def cropped_images_listener(self):
         cp_list = self.list_of_cropped_images
@@ -73,7 +91,7 @@ class Cropped_Panel(ttk.Frame):
         for img in self.img_list:
             img.crop_image(cp_list)
         for img in cp_list:
-            lb_list.append(create_image(self.upper_pane, *img))
+            lb_list.append(create_image(self.image_panel_scroll, *img))
         for pos, lbl in enumerate(lb_list):
             lbl.grid(row=pos // self.mod, column=pos % self.mod,
                      ipadx=5, ipady=5, sticky='nswe')

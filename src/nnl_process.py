@@ -129,7 +129,7 @@ def predict(model, img_path, isProba=True, toPrint=False):
     return (its_class, its_score) if not isProba else (class_names, score)
 
 
-def make_all():
+def train_the_model():
 
     # Creation of training and validation set
     train_ds, val_ds = create_data_set(crop_dir)
@@ -202,7 +202,7 @@ if __name__ == "__main__":
         read_write.read_file(img_list, file_path=json_test)
         read_write.create_all_cropped_images(img_list)
 
-        model, history = make_all()
+        model, history = train_the_model()
     else:
         model = read_model()
 
