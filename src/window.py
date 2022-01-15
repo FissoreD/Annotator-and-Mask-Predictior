@@ -5,6 +5,8 @@
         ask for images to image_reader library
 """
 
+import os
+import shutil
 from tkinter import Frame, ttk, filedialog
 from annotator import annotator
 import cropped_panel
@@ -19,6 +21,7 @@ import read_write
 import tag_panel
 from ttkthemes import ThemedTk
 from sys import argv
+from global_vars import *
 
 param = {'expand': 1, "fill": BOTH}
 
@@ -66,7 +69,7 @@ class right_panel:
     def initialise(self):
         """
             Creation of Save/Load File button
-            'SaveToFile' (resp. 'LoadFile') command is a reference of write_file (resp. read_file) method (cf read_write.py)
+            'Save as JSON' (resp. 'Load JSON') command is a reference of write_file (resp. read_file) method (cf read_write.py)
         """
         self.tc = self.theme_class(self)
         self.select_option(self)
@@ -76,10 +79,10 @@ class right_panel:
             self.father, text='Annotate On-The-Fly',
             command=lambda: annotate_on_the_fly(self.father)).pack(param)
         ttk.Button(
-            self.father, text='SaveToFile',
+            self.father, text='Save as JSON',
             command=lambda: f1[0](self.img_list)).pack(param)
         ttk.Button(
-            self.father, text='LoadFile',
+            self.father, text='Load JSON',
             command=lambda: f1[1](self.img_list)).pack(param)
 
     class select_option:
@@ -173,32 +176,14 @@ class left_panel:
 
     def initialise(self):
         """ We create the 4 tabs and all images object in 'All images' frame """
-        [f.pack() for f in self.tabs]
+        map(tk.Pack, self.tabs)
         # self.notebook.bind("<<NotebookTabChanged>>", self.updateSelected)
         for pos, i in enumerate(self.img_list):
             self.create_img(i, self.under_frame1, pos)
         for f, i in zip(self.tabs, self.titles):
             self.notebook.add(f, text=i)
-        cropped_panel.Cropped_Panel(self.under_frame2, self.img_list)
-
-    def updateSelected(self, _):
-        """
-            According to the selected tab, we update the images displayed (delete then recreate):
-                - if we swap to the first or second tab  and if the images' path have changed
-                - if we swap to the second tab ('Selected images') (systematically)
-        """
-        if self.notebook.index(self.notebook.select()) == 1 or self.old_path != img.path_to_image:
-            for widget in self.under_frame2.winfo_children():
-                widget.grid_forget() if isinstance(widget, tk.Label) else None
-            image = [image for image in self.img_list if image.is_selected]
-            for pos, i in enumerate(image):
-                self.create_img(i, self.under_frame2, pos)
-        if self.notebook.index(self.notebook.select()) == 0 and self.old_path != img.path_to_image:
-            for widget in self.under_frame1.winfo_children():
-                widget.grid_forget() if isinstance(widget, tk.Label) else None
-            for pos, i in enumerate(self.img_list):
-                self.create_img(i, self.under_frame1, pos)
-            self.old_path = img.path_to_image
+        self.cropped_panel = cropped_panel.Cropped_Panel(
+            self.under_frame2, self.img_list)
 
     def create_img(self, i,  frm: Frame, pos):
         """
@@ -244,7 +229,18 @@ class main_class:
 
 def main(list_tag, list_img: List[img.Img], themedMode=True):
 
+    def delete(folder):
+        if os.path.exists(folder):
+            shutil.rmtree(folder)
+
+    def on_closing():
+        folder_to_delete = [crop_dir, KERA_PRED_FOLDER]
+        map(delete, folder_to_delete)
+        root.destroy()
+        return
+
     root = ThemedTk() if themedMode else tk.Tk()
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     main_class(list_tag, list_img, root)
 
     root.minsize(980, 500)

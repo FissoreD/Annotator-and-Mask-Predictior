@@ -82,11 +82,13 @@ class Cropped_Panel(ttk.Frame):
         def make_perc(nb):
             return round(float(nb * 100), 2)
 
+        path = [""]
+
         def sel():
             try:
                 isProba = var.get() == 1
                 scroll.delete('1.0', tk.END)
-                for fn in file_name.get().split(', '):
+                for fn in path[0]:
                     res = nnl_process.predict(
                         model, fn, isProba=isProba)
                     fn = fn.split("/")[-1]
@@ -103,26 +105,17 @@ class Cropped_Panel(ttk.Frame):
                             scroll.insert(tk.INSERT, f"{perc} %\n",
                                           'red' if perc > 50 else 'blue')
             except FileNotFoundError:
-                messagebox.showinfo("Error", "Choose a valid file")
+                pass
 
         def choose_path():
-            path = filedialog.askopenfilenames(
+            path[0] = filedialog.askopenfilenames(
                 filetypes=[('Images', '*.jpg *.png')])
-            file_name.delete(0, tk.END)
-            file_name.insert(0, ', '.join(path))
             sel()
 
         model = nnl_process.read_model()
         tl = tk.Toplevel(self)
         tl.focus()
         tl.grab_set()
-
-        choose_path_pnl = ttk.PanedWindow(tl)
-        file_name = ttk.Entry(choose_path_pnl)
-        send_bt = ttk.Button(choose_path_pnl, text='Send', command=sel)
-        file_name.pack(param, side=tk.LEFT)
-        send_bt.pack(**param, side=tk.LEFT)
-        choose_path_pnl.pack(param)
 
         choose_path_bt = ttk.Button(
             tl, text='Choose your image to analyse', command=choose_path)
