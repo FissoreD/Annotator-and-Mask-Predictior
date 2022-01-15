@@ -6,4 +6,5 @@ path_to_image = "../img"
 test_for_help = '../pre/text/'
 
 image_size = (180, 180)
-epochs = 20
+epochs = 15
+img_ext = '*.jpg *.png *.jpeg'

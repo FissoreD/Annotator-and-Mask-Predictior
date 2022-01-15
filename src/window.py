@@ -33,7 +33,7 @@ def annotate_on_the_fly(parent):
             return
         image.crop_image(path=path)
     path = filedialog.askopenfilename(
-        filetypes=[('Images', '*.jpg *.png')])
+        filetypes=[('Images', img_ext)])
     if path == '':
         return
     image = img.Img(path)
@@ -98,7 +98,7 @@ class right_panel:
             if new_path == '':
                 return
             img.path_to_image = new_path
-            tag_list = self.rp.list_tag
+            tag_list = self.rp.tag_list
             tag_list.imgs = img.open_files()
             while self.rp.list_img:
                 self.rp.list_img.pop()

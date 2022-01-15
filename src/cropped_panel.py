@@ -1,4 +1,4 @@
-from tkinter import Label, messagebox, ttk, filedialog
+from tkinter import Label, ttk, filedialog
 from PIL import ImageTk
 from PIL.Image import Image
 import images
@@ -10,6 +10,7 @@ import tags
 import scrollableframe as sf
 import nnl_process
 from tkinter.scrolledtext import ScrolledText
+from global_vars import *
 
 param = {'expand': 1, "fill": BOTH}
 
@@ -109,7 +110,7 @@ class Cropped_Panel(ttk.Frame):
 
         def choose_path():
             path[0] = filedialog.askopenfilenames(
-                filetypes=[('Images', '*.jpg *.png')])
+                filetypes=[('Images', img_ext)])
             sel()
 
         model = nnl_process.read_model()
