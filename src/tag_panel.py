@@ -78,7 +78,7 @@ class tag_panel(ttk.Frame):
         """ Creation of the button wich allows us create new tag """
         add_tag = ttk.Button(self.bottom_pane, text='Add tag',
                              command=self.add_tag_listener)
-        add_tag.pack(expand=1, fill=tk.BOTH)
+        add_tag.pack(expand=1)
 
     def add_tag_listener(self, isRenaming=None):
         """ Opening of a window wich allows us to enter a name and valid it by pressing 'Enter' key """
