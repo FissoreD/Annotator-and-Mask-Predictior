@@ -227,7 +227,7 @@ class main_class:
         self.rp.initialise()
 
 
-def main(list_tag, list_img: List[img.Img], themedMode=True):
+def main(themedMode=True):
 
     def delete(folder):
         if os.path.exists(folder):
@@ -239,19 +239,19 @@ def main(list_tag, list_img: List[img.Img], themedMode=True):
         root.destroy()
         return
 
+    tag_list = tags.Tag(img.open_files())
+    img_list = tag_list.imgs
+
+    for j in img_list:
+        j.set_tag_list(tag_list)
+        
     root = ThemedTk() if themedMode else tk.Tk()
     root.protocol("WM_DELETE_WINDOW", on_closing)
-    main_class(list_tag, list_img, root)
+    main_class(tag_list, img_list, root)
 
     root.minsize(980, 500)
     root.mainloop()
 
 
 if __name__ == '__main__':
-
-    tag_list = tags.Tag(img.open_files())
-    img_list = tag_list.imgs
-
-    for j in img_list:
-        j.set_tag_list(tag_list)
-    main(tag_list, img_list, themedMode=(not ('-fast' in argv)))
+    main(themedMode=(not ('-fast' in argv)))

@@ -68,19 +68,23 @@ class Cropped_Panel(ttk.Frame):
             text='Make Prediction',
             command=self.make_prediction_panel)
 
-        self.text = tk.Text(parent, width=20, height=20, wrap='word')
+        self.text = tk.Text(parent, width=20, height=20,
+                            wrap='word', fg='blue')
         self.text.insert(tk.END,
-                         "This panel is for make prediction :\n"
-                         "1. Click crop images\n"
+                         "HELP :\n"
+                         "1. Click crop images \n"
+                         " → this will crop all annotation of the 'All images' panel\n\n"
                          "2. Train the model\n"
+                         " → this will create and train the model from cropped images\n\n"
                          "3. Make prediction\n"
-                         "The model created, you can reuse "
-                         "it to make other predictions")
+                         " → this will open a new window where you can load "
+                         "images from disk and make the prediction")
+        self.text.config(state=tk.DISABLED)
 
         button.pack(**param)
         train_model.pack(**param)
         makePrediction.pack(**param)
-        self.text.pack(**param)
+        self.text.pack()
 
     def cropped_images_listener(self):
         cp_list = self.list_of_cropped_images
