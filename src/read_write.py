@@ -52,7 +52,7 @@ def write_file(list_img):
         return
     L = []
     for elt in list_img:
-        L.append([elt.path, elt.tag_of_points])
+        L.append([elt.path, elt.tag_and_points])
     json.dump(L, file)
     file.close()
 
