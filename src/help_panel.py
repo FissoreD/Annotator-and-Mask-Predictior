@@ -15,7 +15,7 @@ button_properties = {
 
 file_path_list = [
     ('All images', 'text_allimg.html'),
-    ('Selected images', 'text_selectimg.html'),
+    ('Cropped images', 'text_croppedimg.html'),
     ('Tags', 'text_tags.html'),
     ('Others', 'text_others.html')
 ]
