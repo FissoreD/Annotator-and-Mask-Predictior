@@ -135,5 +135,5 @@ keras_pred_folder
 */annotation/**
 !*/annotation/test.json
 .vscode
-rep/**
+rep/*
 !*.tex
