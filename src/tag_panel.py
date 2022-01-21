@@ -64,7 +64,7 @@ class tag_panel(ttk.Frame):
         for (pos, elt) in enumerate(sorted(list(self.tag_list - {'&#undefined'}))):
             buttomI = ttk.Label(self.upper_pane, text=elt,
                                 anchor=tk.CENTER, borderwidth=1, relief="solid")
-            buttomI.bind('<Button-2>', self.popup)
+            buttomI.bind('<Button-3>', self.popup)
             buttomI.bind('<Enter>', lambda e: self.hover(e, True))
             buttomI.bind('<Leave>', lambda e: self.hover(e))
             buttomI.grid(row=pos // self.mod, column=pos %
