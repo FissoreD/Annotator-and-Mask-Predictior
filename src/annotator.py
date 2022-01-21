@@ -43,11 +43,11 @@ class annotator(tk.Toplevel):
         self.canvas.pack()
 
         """ For all images, we create the corresponding saved annotations """
-        for tag_name in image.tag_of_rect:
-            rects = image.tag_of_points[tag_name]
+        for tag_name in image.tag_and_rect:
+            rects = image.tag_and_points[tag_name]
             for pos, rec in enumerate(rects):
                 rec_id = self.create_rec(*rec)
-                image.tag_of_rect[tag_name][pos][1] = rec_id
+                image.tag_and_rect[tag_name][pos][1] = rec_id
 
         mainPanel.pack(fill=tk.BOTH, expand=1)
 
@@ -224,7 +224,7 @@ class annotator(tk.Toplevel):
 
         def do_rename(x):
             if is_renaming[0]:
-                self.image.rename_tag_of_rect(is_renaming[1], x.capitalize())
+                self.image.rename_tag_and_rect(is_renaming[1], x.capitalize())
             else:
                 self.tag_list.rename(invalid_word, x.capitalize())
 
