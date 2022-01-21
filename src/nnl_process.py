@@ -8,6 +8,7 @@ import images
 import tags
 import numpy as np
 from global_vars import *
+from model import *
 """
 A lot of code of this file is inspired from the following internet page :
 https://keras.io/examples/vision/image_classification_from_scratch/
@@ -54,38 +55,6 @@ def configure_for_performance(train_ds, val_ds):
     train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
     val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
     return train_ds, val_ds
-
-
-def make_model():
-    data_augmentation = keras.Sequential(
-        [
-            layers.RandomFlip("horizontal",
-                              input_shape=image_size+(3,)),
-            layers.RandomRotation(0.1),
-            layers.RandomZoom(0.1),
-        ]
-    )
-    class_names = get_class_names()
-    num_classes = len(class_names)
-    model = keras.models.Sequential([
-        data_augmentation,
-        layers.Rescaling(1./255),
-        layers.Conv2D(16, 3, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Conv2D(32, 3, padding='same', activation='relu'),
-        # layers.MaxPooling2D(),
-        # layers.Conv2D(64, 3, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        # layers.Dropout(0.2),
-        layers.Flatten(),
-        # layers.Dense(128, activation='relu'),
-        layers.Dense(num_classes)
-    ])
-    f = tf.keras.losses.SparseCategoricalCrossentropy
-    model.compile(optimizer='adam',
-                  loss=f(from_logits=True),
-                  metrics=['accuracy'])
-    return model
 
 
 def train_model(train_ds, val_ds, model):
