@@ -142,7 +142,7 @@ class Cropped_Panel(ttk.Frame):
 
         choose_path_bt = ttk.Button(
             tl, text='Choose your image to analyse', command=choose_path)
-        choose_path_bt.pack(param)
+        choose_path_bt.pack(fill=tk.BOTH)
 
         panel_radio = ttk.PanedWindow(tl)
 
@@ -153,9 +153,9 @@ class Cropped_Panel(ttk.Frame):
         radio2 = ttk.Radiobutton(
             panel_radio, text="Category", variable=var,
             value=2, command=sel)
-        radio1.pack(param, side=tk.LEFT)
-        radio2.pack(param, side=tk.LEFT)
-        panel_radio.pack(param)
+        radio1.pack(fill=tk.BOTH, side=tk.LEFT)
+        radio2.pack(fill=tk.BOTH, side=tk.LEFT)
+        panel_radio.pack(fill=tk.BOTH)
         var.set('1')
 
         scroll = ScrolledText(tl, width=20, height=10)

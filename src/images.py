@@ -67,8 +67,8 @@ class Img:
             big_image.height//big_image.width
         self.big_image = big_image.resize((XSIZE, YSIZE), Image.ANTIALIAS)
 
-        self.tag_of_points: dict = dict()
-        self.tag_of_rect: dict = dict()
+        self.tag_and_points: dict = dict()
+        self.tag_and_rect: dict = dict()
         self.tag_list: set = set()
         self.is_selected = False
 
@@ -85,7 +85,7 @@ class Img:
         box_from_coord = box(x1, y1, x2, y2)
         if abs(x1-x2) <= 5 or abs(y1-y2) <= 5 or box_from_coord.area <= 40:
             return False
-        for (i, r) in list(itertools.chain(*self.tag_of_rect.values())):
+        for (i, r) in list(itertools.chain(*self.tag_and_rect.values())):
             if (box_from_coord.contains(i)):
                 return 'contains', r
             elif (i.contains(box_from_coord)):
@@ -97,62 +97,62 @@ class Img:
                     return 'overlap', r
                 elif box_from_coord.intersection(i).area/a2 >= 0.2:
                     return 'overlapped', r
-        if tag in self.tag_of_points:
-            self.tag_of_points[tag].append(coords)
-            self.tag_of_rect[tag].append([box_from_coord, rect_id])
+        if tag in self.tag_and_points:
+            self.tag_and_points[tag].append(coords)
+            self.tag_and_rect[tag].append([box_from_coord, rect_id])
         else:
             self.tag_list.add(tag)
-            self.tag_of_points[tag] = [coords]
-            self.tag_of_rect[tag] = [[box_from_coord, rect_id]]
+            self.tag_and_points[tag] = [coords]
+            self.tag_and_rect[tag] = [[box_from_coord, rect_id]]
         self.inEvidence()
         return True
 
     def remove_if_empty(self, tag):
-        if len(self.tag_of_points[tag]) == 0:
-            self.tag_of_points.pop(tag)
-            self.tag_of_rect.pop(tag)
+        if len(self.tag_and_points[tag]) == 0:
+            self.tag_and_points.pop(tag)
+            self.tag_and_rect.pop(tag)
             self.inEvidence()
 
     def delete_from_id(self, id):
-        for tag in self.tag_of_rect:
-            for pos, elt in enumerate(self.tag_of_rect[tag]):
+        for tag in self.tag_and_rect:
+            for pos, elt in enumerate(self.tag_and_rect[tag]):
                 if elt[1] == id:
-                    self.tag_of_points[tag].pop(pos)
-                    self.tag_of_rect[tag].pop(pos)
+                    self.tag_and_points[tag].pop(pos)
+                    self.tag_and_rect[tag].pop(pos)
                     self.remove_if_empty(tag)
                     return
 
     def remove_tag(self, tag):
-        self.tag_of_points.pop(tag, None)
-        self.tag_of_rect.pop(tag, None)
+        self.tag_and_points.pop(tag, None)
+        self.tag_and_rect.pop(tag, None)
         self.inEvidence()
 
     def find_tag_by_rect_id(self, rect_id):
-        for key, value in self.tag_of_rect.items():
+        for key, value in self.tag_and_rect.items():
             for pos, x in enumerate(value):
                 if rect_id == x[1]:
                     return key, pos
 
     def rename_tag_of_rect(self, rect_id, new_tag_name):
         old_tag, pos = self.find_tag_by_rect_id(rect_id)
-        self.tag_of_rect[old_tag].pop(pos)
-        coords = self.tag_of_points[old_tag].pop(pos)
+        self.tag_and_rect[old_tag].pop(pos)
+        coords = self.tag_and_points[old_tag].pop(pos)
         self.remove_if_empty(old_tag)
         self.add_tag(new_tag_name, *coords, rect_id)
 
     def update_tag(self, old_value, new_value):
-        if old_value in self.tag_of_points:
-            old_coord1 = self.tag_of_points.pop(old_value)
-            old_coord2 = self.tag_of_rect.pop(old_value)
-            if new_value in self.tag_of_rect:
-                self.tag_of_points[new_value].extend(old_coord1)
-                self.tag_of_rect[new_value].extend(old_coord2)
+        if old_value in self.tag_and_points:
+            old_coord1 = self.tag_and_points.pop(old_value)
+            old_coord2 = self.tag_and_rect.pop(old_value)
+            if new_value in self.tag_and_rect:
+                self.tag_and_points[new_value].extend(old_coord1)
+                self.tag_and_rect[new_value].extend(old_coord2)
             else:
-                self.tag_of_points[new_value] = old_coord1
-                self.tag_of_rect[new_value] = old_coord2
+                self.tag_and_points[new_value] = old_coord1
+                self.tag_and_rect[new_value] = old_coord2
 
     def __str__(self) -> str:
-        return json.dumps((self.path, self.tag_of_points))
+        return json.dumps((self.path, self.tag_and_points))
 
     def __repr__(self):
         return self.__str__()
@@ -171,7 +171,7 @@ class Img:
         path = path if path != None else crop_dir
         if not_on_the_fly and not os.path.exists(path):
             os.mkdir(path)
-        for tag, coordsList in self.tag_of_points.items():
+        for tag, coordsList in self.tag_and_points.items():
             folder_path = f"{path}/{tag}" if not_on_the_fly else path
             if not os.path.exists(folder_path) and not_on_the_fly:
                 os.mkdir(folder_path)
@@ -195,7 +195,7 @@ class Img:
             {"bg": "SystemButtonFace", "fg": "SystemButtonFace"},
             {"bg": "gray51", "fg": "white"}
         ]
-        is_selected = len(self.tag_of_points) > 0
+        is_selected = len(self.tag_and_points) > 0
         try:
             self.imgLabel.config(opts[is_selected])
         except AttributeError:
