@@ -4,7 +4,6 @@ from tkinter.constants import BOTH
 from PIL import Image
 from PIL import ImageTk
 from tkinter import messagebox
-import tags
 import images
 
 """ Default tag's name before its real attributed name """

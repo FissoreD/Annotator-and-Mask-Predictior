@@ -1,5 +1,3 @@
-from sre_parse import expand_template
-from textwrap import fill
 import tkinter as tk
 from tkinter import BOTH, LEFT, ttk
 from typing import List
