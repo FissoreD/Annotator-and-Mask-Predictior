@@ -156,7 +156,7 @@ def test_all(model):
 
 
 if __name__ == "__main__":
-    is_create_model = False or len(sys.argv) > 1
+    is_create_model = True
     if is_create_model:
         """
         Creation of images with annotation from file
