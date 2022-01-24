@@ -1,5 +1,6 @@
 import os
 import sys
+from time import time
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -136,48 +137,68 @@ def test_all(model):
     Make a prediction on every file in test_img folder,
     printing the result in STDOUT
     """
-    L = [('File name', 'Res', 'Proba')]
-    length = map(len, L[0])
-    for file_name in os.listdir(test_img):
+    L = {'TP': 0, 'TN': 0, 'FP': 0, 'FN': 0}
+    fic = sorted(os.listdir(test_img))
+    for pos, file_name in enumerate(fic):
         path = f"{test_img}/{file_name}"
         res, proba = predict(model, path, isProba=False)
-        proba = "{:.2f}".format(float(proba))
-        tup = f"![{file_name}]({path})", res, proba
-        length = map(max, zip(length, map(len, tup)))
-        L.append(tup)
-    length = list(length)
-    print(length)
-    for pos, i in enumerate(L):
-        print("| {: <{}} | {: <{}} | {: <{}} |".format(
-            *[item for sublist in zip(i, length) for item in sublist]
-        ))
-        if pos == 0:
-            print("| {} | {} | {} |".format(*['-' * i for i in length]))
+        if res == 'Mask' and pos < 8:
+            L['TP'] += 1
+        elif res == 'Mask' and pos >= 8:
+            L['FP'] += 1
+        elif res == 'Nomask' and pos < 8:
+            L['FN'] += 1
+        else:
+            L['TN'] += 1
+    # print(length)
+    # for pos, i in enumerate(L):
+    # print("| {: <{}} | {: <{}} | {: <{}} |".format(
+    #     *[item for sublist in zip(i, length) for item in sublist]
+    # ))
+    # if pos == 0:
+    #     print("| {} | {} | {} |".format(*['-' * i for i in length]))
+    return L
 
 
 if __name__ == "__main__":
     is_create_model = True
-    if is_create_model:
-        """
-        Creation of images with annotation from file
-        for testing phase
-        """
-        tag_list = tags.Tag(images.open_files())
-        img_list = tag_list.imgs
+    t = time()
+    L = []
+    N = 2
+    for i in range(N):
+        if is_create_model:
+            """
+            Creation of images with annotation from file
+            for testing phase
+            """
+            # tag_list = tags.Tag(images.open_files())
+            # img_list = tag_list.imgs
 
-        for j in img_list:
-            j.set_tag_list(tag_list)
+            # for j in img_list:
+            #     j.set_tag_list(tag_list)
 
-        read_write.read_file(img_list, file_path=json_test)
-        read_write.create_all_cropped_images(img_list)
+            # read_write.read_file(img_list, file_path=json_test)
+            # read_write.create_all_cropped_images(img_list)
 
-        model, history = train_the_model()
-    else:
-        model = read_model()
+            model, history = train_the_model()
+        else:
+            model = read_model()
+        L.append(test_all(model))
+    print(L)
+    merge_dict = {'TP': 0, 'TN': 0, 'FP': 0, 'FN': 0}
+    for dic in L:
+        for j in dic:
+            merge_dict[j] += dic[j]
+    for i in merge_dict:
+        merge_dict[i] /= N
+        merge_dict[i] /= 15
+        merge_dict[i] *= 100
+    print(merge_dict)
 
     # image_path = test_img + '/Mask_0.jpg'
     # predict(model, image_path, toPrint=True)
-    test_all(model)
+
+    print(time() - t)
 
     """
     Here we test all images wrt our model
