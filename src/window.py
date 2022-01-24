@@ -5,8 +5,6 @@
         ask for images to image_reader library
 """
 
-import os
-import shutil
 from tkinter import Frame, ttk, filedialog
 from annotator import annotator
 import cropped_panel
@@ -19,8 +17,6 @@ import scrollableframe as sf
 import help_panel
 import read_write
 import tag_panel
-from ttkthemes import ThemedTk
-from sys import argv
 from global_vars import *
 
 param = {'expand': 1, "fill": BOTH}
@@ -225,33 +221,3 @@ class main_class:
         self.rp = right_panel(self.root, self.right_panel,
                               self.list_img, self.list_tag, self.lp)
         self.rp.initialise()
-
-
-def main(themedMode=True):
-
-    def delete(folder):
-        if os.path.exists(folder):
-            shutil.rmtree(folder)
-
-    def on_closing():
-        folder_to_delete = [crop_dir, KERA_PRED_FOLDER]
-        map(delete, folder_to_delete)
-        root.destroy()
-        return
-
-    tag_list = tags.Tag(img.open_files())
-    img_list = tag_list.imgs
-
-    for j in img_list:
-        j.set_tag_list(tag_list)
-        
-    root = ThemedTk() if themedMode else tk.Tk()
-    root.protocol("WM_DELETE_WINDOW", on_closing)
-    main_class(tag_list, img_list, root)
-
-    root.minsize(980, 500)
-    root.mainloop()
-
-
-if __name__ == '__main__':
-    main(themedMode=(not ('-fast' in argv)))
