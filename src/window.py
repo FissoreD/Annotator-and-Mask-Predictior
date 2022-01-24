@@ -35,7 +35,9 @@ def annotate_on_the_fly(parent):
     image = img.Img(path)
     image.set_tag_list(tags.Tag([image]))
     w = annotator(parent, image)
-    ttk.Button(w, text="Save your annotations", command=save).pack(param)
+    m = tk.Menu(w)
+    m.add_cascade(label="Save your annotations", command=save)
+    w.config(menu=m)
 
 
 def get_selected_images(list_images: List[img.Img]):
